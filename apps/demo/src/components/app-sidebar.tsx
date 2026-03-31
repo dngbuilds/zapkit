@@ -24,7 +24,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   DashboardSpeed01Icon,
   PieChartIcon,
-  ArrowRightIcon,
   CreditCardIcon,
   MapsIcon,
   LogoutIcon,
@@ -38,7 +37,6 @@ const NAV_ITEMS: { path: string; title: string; icon: typeof DashboardSpeed01Ico
   { path: "/bridge", title: "Deposit to Starknet", icon: MapsIcon },
   { path: "/staking", title: "Staking", icon: PieChartIcon },
   { path: "/lending", title: "Lending/Borrowing", icon: CreditCardIcon },
-  { path: "/send", title: "Send", icon: ArrowRightIcon },
   { path: "/swap", title: "Swap", icon: ShuffleIcon },
   { path: "/dca", title: "DCA", icon: Recycle01Icon },
 ];

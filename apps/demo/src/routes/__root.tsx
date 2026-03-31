@@ -19,7 +19,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/staking": "Staking",
   "/bridge": "Deposit to Starknet",
   "/lending": "Lending/Borrowing",
-  "/send": "Send",
   "/swap": "Swap",
   "/dca": "DCA Orders",
 };
