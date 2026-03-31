@@ -948,7 +948,7 @@ function StakingPage() {
         validator: sp.validator,
       };
     })
-    .sort((a, b) => (a.commissionPercent ?? Infinity) - (b.commissionPercent ?? Infinity));
+    .sort((a, b) => (b.commissionPercent ?? -Infinity) - (a.commissionPercent ?? -Infinity));
 
   // ─── Column defs ─────────────────────────────────────────────
   const columns = buildColumns(
