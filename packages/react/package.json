@@ -1,6 +1,6 @@
 {
   "name": "@dngbuilds/zapkit-react",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "React hooks and provider for Starknet — wallet connection in minutes, not hours.",
   "keywords": [
     "defi",
