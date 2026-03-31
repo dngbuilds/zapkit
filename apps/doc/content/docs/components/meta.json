@@ -1,0 +1,12 @@
+{
+  "title": "Components",
+  "pages": [
+    "index",
+    "connect-wallet-button",
+    "address-badge",
+    "network-badge",
+    "wallet-card",
+    "token-amount",
+    "transaction-status"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "zapkit",
+  "version": "0.0.1",
+  "private": true,
+  "author": {
+    "name": "DngBuilds",
+    "email": "dng.builds@gmail.com"
+  },
+  "type": "module",
+  "scripts": {
+    "ready": "vp fmt && vp lint --ignore-pattern 'apps/doc/**' && vp run test -r && vp run build -r",
+    "lint": "vp lint --ignore-pattern 'apps/doc/**' --ignore-pattern 'apps/demo/src/components/ui/**'",
+    "dev": "vp run website#dev",
+    "demo": "vp run demo#dev",
+    "docs": "vp run doc#dev",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "@tsdown/css": "catalog:"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

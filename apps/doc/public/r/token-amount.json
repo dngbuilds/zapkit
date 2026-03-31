@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "token-amount",
+  "title": "TokenAmount",
+  "description": "Displays a formatted token amount with optional USD equivalent.",
+  "registryDependencies": [
+    "tooltip"
+  ],
+  "files": [
+    {
+      "path": "registry/new-york/token-amount/token-amount.tsx",
+      "content": "import { cn } from \"@/lib/utils\";\n\nexport interface TokenAmountProps {\n  /** Raw numeric amount (e.g. \"1.5\" or 1500000000000000000n) */\n  amount: string | number | bigint;\n  /** Token symbol, e.g. \"STRK\", \"ETH\" */\n  symbol: string;\n  /** Optional USD equivalent to display alongside */\n  usdValue?: string | number | null;\n  /** Decimal places to render. Default: 6 */\n  decimals?: number;\n  /** Hide the symbol. Default: false */\n  hideSymbol?: boolean;\n  className?: string;\n}\n\nfunction formatAmount(raw: string | number | bigint, decimals: number): string {\n  const n = typeof raw === \"bigint\" ? Number(raw) / 1e18 : Number(raw);\n  if (Number.isNaN(n)) return \"—\";\n  return n.toLocaleString(undefined, {\n    minimumFractionDigits: 0,\n    maximumFractionDigits: decimals,\n  });\n}\n\n/**\n * Displays a formatted token amount with optional USD equivalent.\n *\n * @example\n * ```tsx\n * <TokenAmount amount=\"1.5\" symbol=\"STRK\" usdValue=\"0.45\" />\n * <TokenAmount amount={BigInt(\"1500000000000000000\")} symbol=\"ETH\" />\n * ```\n */\nexport function TokenAmount({\n  amount,\n  symbol,\n  usdValue,\n  decimals = 6,\n  hideSymbol = false,\n  className,\n}: TokenAmountProps) {\n  return (\n    <span\n      className={cn(\n        \"inline-flex items-baseline gap-1 tabular-nums\",\n        className\n      )}\n    >\n      <span className=\"font-medium text-foreground\">\n        {formatAmount(amount, decimals)}\n      </span>\n      {!hideSymbol && (\n        <span className=\"text-xs text-muted-foreground font-mono\">\n          {symbol}\n        </span>\n      )}\n      {usdValue != null && (\n        <span className=\"text-xs text-muted-foreground/70\">\n          ≈ ${Number(usdValue).toFixed(2)}\n        </span>\n      )}\n    </span>\n  );\n}\n",
+      "type": "registry:component"
+    }
+  ],
+  "categories": [
+    "common"
+  ],
+  "type": "registry:component"
+}

@@ -1,0 +1,48 @@
+---
+title: NetworkBadge
+description: Colored badge indicating the connected Starknet network.
+---
+
+# NetworkBadge
+
+A small colored badge showing which Starknet network the wallet is connected to.
+
+## Preview
+
+<NetworkBadgePreview />
+
+## Install
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/network-badge.json"
+```
+
+This installs:
+
+- `network-badge.tsx` into your components directory
+- shadcn primitives: `badge`
+
+## Usage
+
+```tsx
+import { NetworkBadge } from "@/components/network-badge";
+
+<NetworkBadge network="mainnet" />
+<NetworkBadge network="sepolia" />
+<NetworkBadge network="devnet" />
+```
+
+## Props
+
+| Prop        | Type                                 | Default     | Description            |
+| ----------- | ------------------------------------ | ----------- | ---------------------- |
+| `network`   | `"mainnet" \| "sepolia" \| "devnet"` | `"mainnet"` | The network to display |
+| `className` | `string`                             | —           | Additional CSS classes |
+
+## Colors
+
+| Network | Color  |
+| ------- | ------ |
+| Mainnet | Green  |
+| Sepolia | Yellow |
+| Devnet  | Blue   |

@@ -1,0 +1,97 @@
+---
+title: Getting Started with Skills
+description: Install and use ZapKit agent skills in your project.
+---
+
+# Getting Started with Skills
+
+## Prerequisites
+
+- A project using ZapKit (`@dngbuilds/zapkit-react`, `@dngbuilds/zapkit-core`)
+- An AI coding assistant (GitHub Copilot, Cursor, Windsurf, Claude Code, etc.)
+
+## Install ZapKit skills
+
+No global installation needed — run directly via `npx`:
+
+```bash
+# Install all ZapKit skills (interactive — pick agents & skills)
+npx skills add dngbuilds/zapkit
+
+# Install a specific skill
+npx skills add dngbuilds/zapkit --skill zapkit-starknet
+
+# Install all skills to all agents without prompts
+npx skills add dngbuilds/zapkit --all
+
+# Install to specific agents only
+npx skills add dngbuilds/zapkit -a cursor -a claude-code -a github-copilot
+```
+
+## Browse available skills
+
+```bash
+# List skills without installing
+npx skills add dngbuilds/zapkit --list
+```
+
+## What gets installed
+
+The `skills` CLI installs `SKILL.md` files into agent-specific directories:
+
+```
+your-project/
+├── .agents/skills/          # GitHub Copilot, Cursor, Codex
+│   └── zapkit-starknet/
+│       └── SKILL.md
+├── .claude/skills/          # Claude Code
+│   └── zapkit-starknet/
+│       └── SKILL.md
+└── skills/                  # Symlinks (single source of truth)
+    └── zapkit-starknet/
+        └── SKILL.md
+```
+
+The exact directories depend on which agents you choose during installation.
+
+## Manage installed skills
+
+```bash
+# List installed skills
+npx skills list
+
+# Check for updates
+npx skills check
+
+# Update all skills to latest
+npx skills update
+
+# Remove a skill
+npx skills remove zapkit-starknet
+```
+
+## How AI assistants use skills
+
+Skills are loaded automatically by supported AI assistants:
+
+- **GitHub Copilot** — Reads `.agents/skills/*/SKILL.md` as workspace context
+- **Cursor** — Reads `.agents/skills/*/SKILL.md`
+- **Claude Code** — Reads `.claude/skills/*/SKILL.md`
+- **Windsurf** — Reads `.windsurf/skills/*/SKILL.md`
+- **Codex** — Reads `.agents/skills/*/SKILL.md`
+
+When you ask your AI to "connect a Starknet wallet" or "build a swap UI", it automatically applies the relevant skill's knowledge to produce better code.
+
+## Install all three skills
+
+For comprehensive Starknet coverage, install all ZapKit skills:
+
+```bash
+npx skills add dngbuilds/zapkit --all
+```
+
+This installs:
+
+- **zapkit-starknet** — Wallet connection, transactions, accounts
+- **zapkit-defi** — Token ops, swaps, staking, lending
+- **zapkit-wallet-ui** — shadcn component composition patterns

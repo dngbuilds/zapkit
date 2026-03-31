@@ -1,0 +1,340 @@
+---
+title: Why We Built ZapKit — Making Starknet Accessible for Every Developer
+description: The story behind ZapKit, what building on Starknet looks like without it, and how we're closing the developer experience gap.
+---
+
+# Why We Built ZapKit — Making Starknet Accessible for Every Developer
+
+Starknet is one of the most technically advanced L2s in crypto. ZK-STARKs, Cairo, account abstraction built in from day one — the architecture is genuinely ahead of its time.
+
+But here's the uncomfortable truth: **most web developers bounce off Starknet in the first 30 minutes.**
+
+Not because the tech is bad. Because the onboarding experience is.
+
+We built ZapKit to fix that.
+
+---
+
+## What Makes Starknet Special (And Worth Building On)
+
+Before we talk about the dev experience, let's talk about why you'd even want to build on Starknet in the first place. Because honestly? The tech is wild.
+
+### Zero-Knowledge Proofs — For Real This Time
+
+Starknet runs on ZK-STARK proofs — the same cryptography that lets you prove you know something **without revealing what it is**. Every transaction on Starknet is verified by a mathematical proof that's generated off-chain and verified on Ethereum. No trust required. No optimistic game theory. Just math.
+
+This isn't just about security — it's the foundation for **selective privacy**. A ZK proof lets a smart contract verify facts about a user (they're over 18, they hold a balance, they passed KYC) without ever seeing the underlying data. We're just scratching the surface of what this enables.
+
+### Account Abstraction From Day One
+
+On Ethereum, accounts are either wallets (private keys) or contracts — and never the two shall meet. On Starknet, **every account is a smart contract**. That means:
+
+- Pay gas in any token (not just ETH)
+- Session keys — sign once, act many times (Cartridge Controller uses this)
+- Social recovery, multisig, and passkeys baked in natively
+- Custom validation logic for every transaction
+
+No EIPs needed. No future upgrade required. It just works today.
+
+### STRK20 — Starknet's Native Token Standard
+
+STRK20 is Starknet's answer to ERC-20. It's the token standard built for Cairo — optimized for Cairo's type system, leveraging felt252 arithmetic and native multicall. STRK, the network's gas and governance token, is itself an STRK20 token.
+
+For developers, STRK20 tokens work seamlessly with ZapKit — `useBalance()`, `useSwap()`, and lending hooks all understand STRK20 token metadata out of the box.
+
+### Why This All Matters
+
+Starknet isn't just "cheaper Ethereum." It's a fundamentally different computational environment where:
+
+- **Proofs replace trust** — validators prove correctness rather than assume honesty
+- **Accounts are programmable** — your wallet can have any logic you can write in Cairo
+- **Privacy is achievable** — ZK proofs make selective disclosure possible without centralized gatekeepers
+
+That's worth building on. That's worth the friction.
+
+And with ZapKit, you don't even need to deal with the friction.
+
+---
+
+## The Problem: Starknet's Developer Gap
+
+If you're a React developer coming from Ethereum or Solana, you already know the playbook. Install a wallet library, connect, fetch balances, send transactions. Wagmi, RainbowKit, Solana Wallet Adapter — these tools make it trivial.
+
+On Starknet? There's no single answer. You piece things together:
+
+- **starknet.js** for the low-level client
+- **get-starknet** or manual setup for wallet detection
+- Separate logic for Argent, Braavos, and Cartridge
+- Cairo-specific patterns like felt252 arithmetic and multicall batching
+- No component library — you write every button and badge from scratch
+
+Each piece works. But stitching them together burns hours before you ship anything real.
+
+### What "Without ZapKit" Actually Looks Like
+
+Here's a simplified wallet connection flow without any abstraction layer:
+
+```tsx
+import { connect } from "get-starknet";
+import { Account, Provider, constants } from "starknet";
+import { useState, useCallback } from "react";
+
+function WalletConnect() {
+  const [account, setAccount] = useState<Account | null>(null);
+  const [address, setAddress] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [error, setError] = useState("");
+
+  const handleConnect = useCallback(async () => {
+    setStatus("connecting");
+    setError("");
+    try {
+      const starknet = await connect();
+      if (!starknet?.isConnected) {
+        throw new Error("Connection failed");
+      }
+      await starknet.enable();
+      const provider = new Provider({
+        sequencer: { network: constants.NetworkName.SN_MAIN },
+      });
+      const acc = new Account(provider, starknet.selectedAddress, starknet.account.signer);
+      setAccount(acc);
+      setAddress(starknet.selectedAddress);
+      setStatus("connected");
+    } catch (err) {
+      setError(err.message);
+      setStatus("error");
+    }
+  }, []);
+
+  const handleDisconnect = useCallback(async () => {
+    setAccount(null);
+    setAddress("");
+    setStatus("idle");
+  }, []);
+
+  return (
+    <div>
+      {status === "connected" ? (
+        <div>
+          <span>
+            {address.slice(0, 6)}...{address.slice(-4)}
+          </span>
+          <button onClick={handleDisconnect}>Disconnect</button>
+        </div>
+      ) : (
+        <button onClick={handleConnect} disabled={status === "connecting"}>
+          {status === "connecting" ? "Connecting..." : "Connect Wallet"}
+        </button>
+      )}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+    </div>
+  );
+}
+```
+
+That's **~50 lines** just to connect a wallet. No styling. No loading states. No multicall. No support for Cartridge Controller. No error boundaries.
+
+And if you want to add a swap? You need another 80+ lines to handle approve + multicall batching, slippage protection, felt252 conversions, and error handling for Cairo-specific reverts.
+
+The boilerplate compounds fast.
+
+---
+
+## The Solution: What ZapKit Changes
+
+ZapKit collapses all of that into a coherent developer experience:
+
+### Wallet Connection — 3 Lines
+
+```tsx
+import { useWallet } from "@dngbuilds/zapkit-react";
+
+const { wallet, status, connectSigner, disconnect } = useWallet();
+```
+
+That's it. Cartridge Controller, Argent, Braavos — all handled. Connection states, error handling, account management — built in.
+
+### Full App Setup — Under 10 Lines
+
+```tsx
+import { ZapProvider, useWallet } from "@dngbuilds/zapkit-react";
+
+function App() {
+  return (
+    <ZapProvider config={{ network: "mainnet" }}>
+      <Wallet />
+    </ZapProvider>
+  );
+}
+
+function Wallet() {
+  const { wallet, status, connectSigner, disconnect } = useWallet();
+
+  if (status === "connected") {
+    return <p>Connected: {String(wallet?.address)}</p>;
+  }
+  return <button onClick={connectSigner}>Connect Wallet</button>;
+}
+```
+
+### DeFi Operations — Handled
+
+Need a token swap with proper slippage protection and multicall?
+
+```tsx
+import { useSwap, usePresetTokens, Amount } from "@dngbuilds/zapkit-react";
+
+function SwapButton() {
+  const tokens = usePresetTokens();
+  const { getQuote, swap, isQuoting, isSwapping, quote } = useSwap();
+
+  const handleSwap = async () => {
+    // Fetch a quote from the best available DEX
+    await getQuote({
+      tokenIn: tokens.ETH,
+      tokenOut: tokens.USDC,
+      amountIn: Amount.parse("0.01", tokens.ETH),
+      slippageBps: 50, // 0.5%
+    });
+    // Execute — approve + swap batched in one multicall
+    if (quote) await swap({ quote });
+  };
+
+  return (
+    <button onClick={handleSwap} disabled={isQuoting || isSwapping}>
+      {isQuoting ? "Getting quote…" : isSwapping ? "Swapping…" : "Swap ETH → USDC"}
+    </button>
+  );
+}
+```
+
+No manual felt252 math. No separate approve transaction. One multicall.
+
+### UI Components — Drop-In
+
+We don't make you build wallet UI from scratch. ZapKit ships component blueprints via the [shadcn registry](https://zapkit.vercel.app/docs/components):
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/connect-wallet-button.json"
+npx shadcn@latest add "https://zapkit.vercel.app/r/wallet-card.json"
+npx shadcn@latest add "https://zapkit.vercel.app/r/address-badge.json"
+```
+
+These aren't black-box components. They install into your codebase as source files. You own them. Customize them. They follow shadcn conventions — Tailwind, Radix UI, fully accessible.
+
+---
+
+## Side-by-Side: The Before and After
+
+| Task                                 | Without ZapKit                  | With ZapKit                       |
+| ------------------------------------ | ------------------------------- | --------------------------------- |
+| Connect wallet                       | ~50 lines, manual state         | `useWallet()` — 1 line            |
+| Support Cartridge + Argent + Braavos | Separate integration per wallet | One config, one API               |
+| Approve + swap multicall             | Manual felt252 math + batching  | `useSwap()` — quote then swap     |
+| Wallet UI (button, badge, card)      | Build from scratch              | `npx shadcn@latest add <url>`     |
+| AI assistant knows Starknet patterns | Hallucinated code               | `npx skills add dngbuilds/zapkit` |
+| Time to first working dApp           | Hours to days                   | Minutes                           |
+
+---
+
+## The Secret Weapon: AI Agent Skills
+
+This is the part we're most excited about.
+
+ZapKit publishes [agent skills](https://zapkit.vercel.app/docs/skills) to the [skills.sh](https://skills.sh/) ecosystem — the same platform used by Vercel, shadcn, and Microsoft.
+
+```bash
+npx skills add dngbuilds/zapkit
+```
+
+This installs structured instructions into your project that AI coding assistants (GitHub Copilot, Cursor, Claude Code, Windsurf, and 40+ more) read as context.
+
+**What changes:**
+
+- Ask Copilot to "connect a Starknet wallet" → it uses `ZapProvider` + `useWallet()` correctly
+- Ask it to "build a swap" → it batches approve + swap in multicall with slippage protection
+- Ask it to "add a wallet card" → it runs the right `npx shadcn@latest add` command
+
+Without skills, AI assistants guess. With skills, they actually know.
+
+Three skills available:
+
+| Skill                | What it teaches                                     |
+| -------------------- | --------------------------------------------------- |
+| **zapkit-starknet**  | Wallet connection, transactions, account management |
+| **zapkit-defi**      | Token ops, swaps, staking, lending, bridges         |
+| **zapkit-wallet-ui** | shadcn component installation and composition       |
+
+---
+
+## Why This Matters for Starknet
+
+Starknet has the best L2 technology in the space. Account abstraction by default. Provable computation. A VM purpose-built for zero-knowledge proofs. STRK20 tokens that work natively with Cairo.
+
+But here's the hard truth about developer ecosystems: **the best technology doesn't always win. The most accessible technology wins.**
+
+Every developer who bounces off Starknet because the onboarding is too rough is a dApp that never gets built, a user that never onboards, a use case that never gets explored. That's potential left on the table — not just for Starknet, but for the whole idea of privacy-preserving, user-sovereign applications.
+
+**ZapKit exists to lower the floor without lowering the ceiling.**
+
+You still get full Cairo power, full account abstraction, full ZK-STARK proofs. You still get STRK20 compatibility, session keys, and provable computation. You just don't need to fight the infrastructure to start building.
+
+We think the future of the internet runs on Starknet. We're trying to make sure developers can actually get there.
+
+## Thank You
+
+We want to acknowledge the **Starknet Foundation** and the broader **Starknet** community for creating the engineering foundation that makes all of this possible.
+
+ZapKit builds on top of incredible work from:
+
+- **[StarkZap](https://starkzap.com)** — The DeFi infrastructure layer we wrap
+- **[Cartridge](https://cartridge.gg)** — Session keys and social login
+- **[starknet.js](https://www.starknetjs.com/)** — The JavaScript client we extend
+- **Argent** and **Braavos** — Wallet providers pushing account abstraction forward
+
+And thanks to the [skills.sh](https://skills.sh/) ecosystem by **Vercel** for giving us a way to ship AI-native developer tools.
+
+We're building in public. The entire codebase is open source.
+
+---
+
+## Get Started — Seriously, Just Try It
+
+You've read this far. That means you're at least curious. Let's turn that into a working dApp.
+
+**Three commands to go from zero to Starknet:**
+
+**Install the SDK:**
+
+```bash
+npm install @dngbuilds/zapkit-react
+```
+
+**Add a ready-made wallet button:**
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/connect-wallet-button.json"
+```
+
+**Teach your AI assistant Starknet:**
+
+```bash
+npx skills add dngbuilds/zapkit
+```
+
+Your app can read Starknet balances, execute swaps, interact with lending protocols, and bridge assets — all before lunch. We're not kidding.
+
+**Go build something:**
+
+- [Documentation](https://zapkit.vercel.app) — start here
+- [Getting Started Guide](https://zapkit.vercel.app/docs/getting-started) — 5-minute setup
+- [Component Registry](https://zapkit.vercel.app/docs/components) — drop-in wallet UI
+- [Agent Skills](https://zapkit.vercel.app/docs/skills) — AI-native patterns
+- [GitHub](https://github.com/dngbuilds/zapkit) — fork it, star it, open issues
+
+The whole ZK-STARK, privacy-chain, account-abstraction future? It starts with a `useWallet()` call.
+
+---
+
+_ZapKit is MIT licensed. Built by [DngBuilds](https://github.com/dngbuilds)._

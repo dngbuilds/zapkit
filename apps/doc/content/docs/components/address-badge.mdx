@@ -1,0 +1,48 @@
+---
+title: AddressBadge
+description: Inline address badge with tooltip and copy-on-click.
+---
+
+# AddressBadge
+
+Displays a truncated wallet address in a compact badge. Hovering reveals the full address in a tooltip. Clicking copies it to the clipboard.
+
+## Preview
+
+<AddressBadgePreview />
+
+## Install
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/address-badge.json"
+```
+
+This installs:
+
+- `address-badge.tsx` into your components directory
+- shadcn primitives: `tooltip`, `badge`
+
+## Usage
+
+```tsx
+import { AddressBadge } from "@/components/address-badge";
+
+<AddressBadge
+  address="0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
+  ens="vitalik.stark"
+/>;
+```
+
+## Props
+
+| Prop        | Type             | Default    | Description                                                   |
+| ----------- | ---------------- | ---------- | ------------------------------------------------------------- |
+| `address`   | `string`         | _required_ | Full wallet address                                           |
+| `ens`       | `string \| null` | `null`     | Resolved StarkNet ID — displayed instead of truncated address |
+| `className` | `string`         | —          | Additional CSS classes                                        |
+
+## Behaviour
+
+- Shows truncated address (`0x049d…dc7`) or the StarkNet ID if provided
+- Hover tooltip shows the full address
+- Click copies the address and shows "Copied!" feedback for 1.5 seconds

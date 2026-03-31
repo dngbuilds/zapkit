@@ -1,0 +1,81 @@
+---
+title: ConnectWalletButton
+description: A smart button that handles the full wallet connect / disconnect lifecycle.
+---
+
+# ConnectWalletButton
+
+A single button that manages the full wallet connection flow — idle, connecting (spinner), connected (truncated address), and disconnect.
+
+## Preview
+
+<ConnectWalletButtonPreview />
+
+## Install
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/connect-wallet-button.json"
+```
+
+This installs:
+
+- `connect-wallet-button.tsx` into your components directory
+- shadcn primitives: `button`, `spinner`
+- npm dependency: `@dngbuilds/zapkit-react`
+
+## Usage
+
+```tsx
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
+
+export function Header() {
+  return (
+    <nav className="flex items-center justify-between p-4">
+      <h1>My DApp</h1>
+      <ConnectWalletButton />
+    </nav>
+  );
+}
+```
+
+The component calls `useWallet()` internally — no extra wiring needed.
+
+## Props
+
+| Prop           | Type                     | Default  | Description                |
+| -------------- | ------------------------ | -------- | -------------------------- |
+| `status`       | `WalletConnectionStatus` | `"idle"` | Current connection status  |
+| `address`      | `string \| null`         | —        | Connected wallet address   |
+| `ens`          | `string \| null`         | —        | Resolved StarkNet ID       |
+| `onConnect`    | `() => void`             | —        | Called on Connect click    |
+| `onDisconnect` | `() => void`             | —        | Called on Disconnect click |
+| `className`    | `string`                 | —        | Additional CSS classes     |
+
+## States
+
+- **Disconnected** — Shows "Connect Wallet"
+- **Connecting** — Shows a spinner
+- **Connected** — Shows truncated address (or StarkNet ID), click to disconnect
+
+## Custom trigger
+
+Build your own button with hooks:
+
+```tsx
+import { useConnect, useWallet } from "@dngbuilds/zapkit-react";
+import { OnboardStrategy } from "@dngbuilds/zapkit-react";
+
+function CustomButton() {
+  const { connect } = useConnect();
+  const { status } = useWallet();
+
+  return (
+    <button
+      disabled={status === "connecting"}
+      onClick={() => connect({ strategy: OnboardStrategy.Cartridge })}
+    >
+      {status === "connecting" ? "Connecting..." : "Connect"}
+    </button>
+  );
+}
+```

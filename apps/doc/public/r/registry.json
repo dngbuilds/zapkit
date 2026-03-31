@@ -1,0 +1,113 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "zapkit",
+  "homepage": "https://zapkit.dev",
+  "items": [
+    {
+      "name": "connect-wallet-button",
+      "type": "registry:component",
+      "title": "ConnectWalletButton",
+      "description": "A smart button for wallet connect / disconnect. Shows a spinner while connecting, truncated address when connected.",
+      "categories": ["connect"],
+      "registryDependencies": ["button", "spinner"],
+      "dependencies": ["@zapkit/react"],
+      "files": [
+        {
+          "path": "registry/new-york/connect-wallet-button/connect-wallet-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "address-badge",
+      "type": "registry:component",
+      "title": "AddressBadge",
+      "description": "Inline address badge with tooltip showing the full address and copy-on-click.",
+      "categories": ["connect"],
+      "registryDependencies": ["tooltip", "badge"],
+      "files": [
+        {
+          "path": "registry/new-york/address-badge/address-badge.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "network-badge",
+      "type": "registry:component",
+      "title": "NetworkBadge",
+      "description": "Small colored badge indicating the connected Starknet network (mainnet, sepolia, devnet, etc.).",
+      "categories": ["connect"],
+      "registryDependencies": ["badge"],
+      "files": [
+        {
+          "path": "registry/new-york/network-badge/network-badge.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "token-amount",
+      "type": "registry:component",
+      "title": "TokenAmount",
+      "description": "Displays a formatted token amount with optional USD equivalent.",
+      "categories": ["common"],
+      "registryDependencies": ["tooltip"],
+      "files": [
+        {
+          "path": "registry/new-york/token-amount/token-amount.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "transaction-status",
+      "type": "registry:component",
+      "title": "TransactionStatus",
+      "description": "Inline alert showing transaction state — spinner while pending, check when confirmed, error when failed.",
+      "categories": ["common"],
+      "registryDependencies": ["alert", "spinner"],
+      "dependencies": ["@hugeicons/react", "@hugeicons/core-free-icons"],
+      "files": [
+        {
+          "path": "registry/new-york/transaction-status/transaction-status.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "wallet-card",
+      "type": "registry:block",
+      "title": "WalletCard",
+      "description": "A card summarising the connected wallet: address, network, balances, and disconnect action.",
+      "categories": ["connect"],
+      "registryDependencies": [
+        "card",
+        "button",
+        "separator",
+        "skeleton",
+        "tooltip",
+        "badge"
+      ],
+      "dependencies": ["@zapkit/react"],
+      "files": [
+        {
+          "path": "registry/new-york/wallet-card/wallet-card.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/wallet-card/address-badge.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/wallet-card/network-badge.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/wallet-card/token-amount.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

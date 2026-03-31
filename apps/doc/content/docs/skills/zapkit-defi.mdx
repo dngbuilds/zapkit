@@ -1,0 +1,68 @@
+---
+title: "zapkit-defi"
+description: DeFi building blocks and patterns for Starknet applications.
+---
+
+# zapkit-defi
+
+Teaches your AI assistant DeFi-specific patterns for building on Starknet with ZapKit.
+
+## Install
+
+```bash
+npx skills add dngbuilds/zapkit --skill zapkit-defi
+```
+
+## What your AI learns
+
+### Token Operations
+
+- ERC-20 token approval and transfer patterns on Starknet
+- Multicall approve + swap in a single transaction
+- Token amount formatting and decimal handling
+- Balance fetching and caching strategies
+
+### Swap Integration
+
+- AMM integration patterns (Ekubo, JediSwap, 10KSwap)
+- Quote fetching and slippage protection
+- Multi-hop routing basics
+- Price impact warnings
+
+### Lending & Borrowing
+
+- Lending protocol patterns (zkLend, Nostra)
+- Supply, borrow, repay transaction flows
+- Health factor monitoring
+- Liquidation risk display
+
+### Staking
+
+- Liquid staking patterns (e.g. stSTRK)
+- Stake, unstake, claim reward flows
+- APY calculation and display
+- Unbonding period handling
+
+### Bridge
+
+- Cross-chain bridge patterns (StarkGate, LayerSwap)
+- Deposit and withdrawal flows
+- Bridge status tracking
+
+## Rules included
+
+| Rule                  | Priority | Description                                                             |
+| --------------------- | -------- | ----------------------------------------------------------------------- |
+| `token-approvals`     | CRITICAL | Always check allowance before swap; batch approve + action in multicall |
+| `slippage-protection` | CRITICAL | Never submit swaps without slippage bounds                              |
+| `amount-handling`     | HIGH     | Use BigInt for all token amounts; format only at display layer          |
+| `quote-freshness`     | HIGH     | Re-fetch quotes before submission; show staleness warnings              |
+| `error-recovery`      | MEDIUM   | Handle reverted transactions gracefully; show actionable error messages |
+| `balance-caching`     | MEDIUM   | Cache balances with SWR pattern; invalidate after transactions          |
+
+## Example prompt
+
+> "Build a token swap UI that lets users swap ETH for STRK on Starknet"
+
+Without skill — AI might use Ethereum-style patterns that don't work on Starknet.
+With skill — AI uses Starknet multicall for approve+swap, handles felt252 amounts correctly, and adds proper slippage protection.

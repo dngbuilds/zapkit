@@ -1,0 +1,150 @@
+---
+title: Onboard Strategies
+description: Configure Cartridge, Stark Signer, and Privy wallet strategies in ZapKit.
+---
+
+# Onboard Strategies
+
+ZapKit has three `OnboardStrategy` options. Each has different setup requirements.
+
+## Cartridge (default)
+
+No extra setup needed — `@cartridge/controller` is bundled with `@dngbuilds/zapkit-core`.
+
+```tsx
+import { OnboardStrategy } from "@dngbuilds/zapkit-react";
+
+connect({ strategy: OnboardStrategy.Cartridge });
+```
+
+**Optional config** — pass policies for gasless session keys:
+
+```tsx
+connect({
+  strategy: OnboardStrategy.Cartridge,
+  cartridge: {
+    policies: [{ target: "0xCONTRACT_ADDRESS", method: "transfer" }],
+    preset: "my-app", // optional Cartridge preset name
+  },
+});
+```
+
+---
+
+## Stark Signer
+
+Connects with a raw Starknet private key. **Only use on devnet with throwaway keys.**
+
+### Setup
+
+No extra packages required — `StarkSigner` is exported from `@dngbuilds/zapkit-react`.
+
+```tsx
+import { OnboardStrategy, StarkSigner } from "@dngbuilds/zapkit-react";
+
+connect({
+  strategy: OnboardStrategy.Signer,
+  account: {
+    signer: new StarkSigner("0x<private-key-hex>"),
+  },
+});
+```
+
+The address is derived from the key using the OpenZeppelin account class by default. To use a different class:
+
+```tsx
+import { StarkSigner, accountPresets } from "@dngbuilds/zapkit-react";
+
+connect({
+  strategy: OnboardStrategy.Signer,
+  account: {
+    signer: new StarkSigner(privateKey),
+    accountClass: accountPresets.argent, // or accountPresets.braavos
+  },
+});
+```
+
+---
+
+## Privy
+
+Connects using a [Privy](https://privy.io) embedded wallet. Privy manages key generation and custody — your users never see a seed phrase.
+
+### 1. Install Privy SDK
+
+```bash
+npm install @privy-io/react-auth
+```
+
+### 2. Wrap your app with PrivyProvider
+
+```tsx title="app/layout.tsx"
+import { PrivyProvider } from "@privy-io/react-auth";
+import { ZapProvider } from "@dngbuilds/zapkit-react";
+
+export default function RootLayout({ children }) {
+  return (
+    <PrivyProvider
+      appId="your-privy-app-id"
+      config={{
+        embeddedWallets: {
+          createOnLogin: "users-without-wallets",
+          requireUserPasswordOnCreate: false,
+        },
+      }}
+    >
+      <ZapProvider config={{ network: "mainnet" }}>{children}</ZapProvider>
+    </PrivyProvider>
+  );
+}
+```
+
+### 3. Connect with Privy wallet
+
+```tsx
+import { usePrivy, useSignMessage } from "@privy-io/react-auth";
+import { useWallet, OnboardStrategy } from "@dngbuilds/zapkit-react";
+
+function ConnectButton() {
+  const { user, ready } = usePrivy();
+  const { signMessage } = useSignMessage();
+  const { connect } = useWallet();
+
+  async function handleConnect() {
+    const wallet = user?.linkedAccounts.find(
+      (a) => a.type === "wallet" && a.walletClientType === "privy",
+    );
+
+    if (!wallet) return;
+
+    connect({
+      strategy: OnboardStrategy.Privy,
+      privy: {
+        resolve: async () => ({
+          walletId: wallet.address, // Privy wallet address used as ID
+          publicKey: wallet.publicKey ?? "", // hex-encoded Stark public key
+          rawSign: async (_id, hash) => {
+            const { signature } = await signMessage({
+              message: hash,
+            });
+            return signature;
+          },
+        }),
+      },
+    });
+  }
+
+  if (!ready) return null;
+  return <button onClick={handleConnect}>Connect with Privy</button>;
+}
+```
+
+### Privy resolve shape
+
+| Field       | Type                                  | Description                                          |
+| ----------- | ------------------------------------- | ---------------------------------------------------- |
+| `walletId`  | `string`                              | Unique identifier — usually the Privy wallet address |
+| `publicKey` | `string`                              | Stark public key (hex)                               |
+| `rawSign`   | `(walletId, hash) => Promise<string>` | Optional custom signing function                     |
+
+If `rawSign` is omitted, ZapKit will call Privy's `signMessage` internally where possible.

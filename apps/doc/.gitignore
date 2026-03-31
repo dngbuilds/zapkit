@@ -1,0 +1,26 @@
+# Next.js build output
+.next/
+
+# fumadocs-mdx generated source
+.source/
+
+# Dependencies
+node_modules/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Production build
+out/
+
+# Environment variables
+.env
+.env*.local
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db

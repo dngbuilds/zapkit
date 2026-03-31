@@ -1,0 +1,55 @@
+---
+title: TokenAmount
+description: Formatted token amount display with optional USD tooltip.
+---
+
+# TokenAmount
+
+Displays a formatted token amount. When a USD value is provided, hovering reveals it in a tooltip.
+
+## Preview
+
+<TokenAmountPreview />
+
+## Install
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/token-amount.json"
+```
+
+This installs:
+
+- `token-amount.tsx` into your components directory
+- shadcn primitives: `tooltip`
+
+## Usage
+
+```tsx
+import { TokenAmount } from "@/components/token-amount";
+
+{
+  /* Basic */
+}
+<TokenAmount amount="1234.5678" symbol="ETH" />;
+
+{
+  /* With USD tooltip */
+}
+<TokenAmount amount="1234.5678" symbol="ETH" usdValue="3,703,915.20" />;
+
+{
+  /* Custom decimals, no symbol */
+}
+<TokenAmount amount="0.000001" symbol="ETH" decimals={8} hideSymbol />;
+```
+
+## Props
+
+| Prop         | Type             | Default    | Description                       |
+| ------------ | ---------------- | ---------- | --------------------------------- |
+| `amount`     | `string`         | _required_ | Raw or pre-formatted token amount |
+| `symbol`     | `string`         | _required_ | Token symbol (e.g. "ETH")         |
+| `usdValue`   | `string \| null` | `null`     | US dollar value string            |
+| `decimals`   | `number`         | `6`        | Maximum decimal places to display |
+| `hideSymbol` | `boolean`        | `false`    | Hide the symbol suffix            |
+| `className`  | `string`         | —          | Additional CSS classes            |

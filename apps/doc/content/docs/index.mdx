@@ -1,0 +1,61 @@
+---
+title: Introduction
+description: ZapKit — the Starknet wallet SDK for React applications.
+---
+
+# ZapKit
+
+ZapKit is a modular Starknet wallet integration SDK for React. It provides a unified API to connect wallets, manage accounts, and send transactions across multiple onboarding strategies.
+
+## Features
+
+- **Multi-strategy onboarding** — Cartridge, raw Stark Signer, and Privy
+- **React hooks** — `useZapKit`, `useWallet`, `useConnect`
+- **UI components** — copy-paste components via [shadcn registry](/docs/components)
+- **Agent skills** — AI coding skills for Starknet DeFi development
+- **TypeScript-first** — fully typed, tree-shakeable packages
+
+## Packages
+
+| Package         | Description                            |
+| --------------- | -------------------------------------- |
+| `@dngbuilds/zapkit-core`  | Strategy registry, types, chain config |
+| `@dngbuilds/zapkit-react` | React Provider + hooks                 |
+| `@zapkit/utils` | Shared utilities                       |
+
+## Quick start
+
+### 1. Install the SDK
+
+```bash
+npm install @dngbuilds/zapkit-react
+```
+
+### 2. Add UI components from the registry
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/connect-wallet-button.json"
+```
+
+### 3. Wire it up
+
+```tsx
+import { ZapProvider } from "@dngbuilds/zapkit-react";
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
+
+export default function App() {
+  return (
+    <ZapProvider>
+      <ConnectWalletButton />
+    </ZapProvider>
+  );
+}
+```
+
+### 4. Install agent skills (optional)
+
+Supercharge your AI assistant with Starknet knowledge:
+
+```bash
+npx skills add zapkit/skills@zapkit-starknet
+```

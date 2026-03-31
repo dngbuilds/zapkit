@@ -1,0 +1,115 @@
+---
+title: Getting Started
+description: Install ZapKit and connect your first Starknet wallet.
+---
+
+# Getting Started
+
+## Installation
+
+Install the core SDK:
+
+```bash
+npm install @dngbuilds/zapkit-react
+```
+
+Then install UI components from the [ZapKit registry](/docs/components):
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/connect-wallet-button.json"
+```
+
+## Setup
+
+### 1. Wrap your app with `ZapProvider`
+
+```tsx title="app/layout.tsx"
+import { ZapProvider } from "@dngbuilds/zapkit-react";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <ZapProvider>{children}</ZapProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 2. Add the connect button
+
+```tsx title="app/page.tsx"
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
+
+export default function Page() {
+  return (
+    <main>
+      <ConnectWalletButton />
+    </main>
+  );
+}
+```
+
+### 3. Use hooks
+
+```tsx
+import { useWallet, useConnect } from "@dngbuilds/zapkit-react";
+import { OnboardStrategy } from "@dngbuilds/zapkit-react";
+
+function WalletStatus() {
+  const { account, status } = useWallet();
+  const { connect } = useConnect();
+
+  if (status === "connected") {
+    return <p>Connected: {account?.address}</p>;
+  }
+
+  return (
+    <button onClick={() => connect({ strategy: OnboardStrategy.Cartridge })}>
+      Connect with Cartridge
+    </button>
+  );
+}
+```
+
+## Onboarding Strategies
+
+ZapKit supports three connection strategies:
+
+### Cartridge (recommended)
+
+Social login + passkeys powered by [Cartridge Controller](https://cartridge.gg).
+
+```tsx
+connect({ strategy: OnboardStrategy.Cartridge });
+```
+
+### Stark Signer (dev/testing)
+
+Connect directly with a private key. **Not for production.**
+
+```tsx
+import { StarkSigner } from "@dngbuilds/zapkit-react";
+
+connect({
+  strategy: OnboardStrategy.Signer,
+  account: { signer: new StarkSigner(privateKey) },
+});
+```
+
+### Privy
+
+Use [Privy](https://privy.io) embedded wallets.
+
+```tsx
+connect({
+  strategy: OnboardStrategy.Privy,
+  privy: {
+    resolve: async () => ({
+      walletId: "privy-wallet-id",
+      publicKey: "0x...",
+    }),
+  },
+});
+```

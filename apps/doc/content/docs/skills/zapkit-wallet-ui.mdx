@@ -1,0 +1,73 @@
+---
+title: "zapkit-wallet-ui"
+description: Wallet UI composition patterns using shadcn and ZapKit registry components.
+---
+
+# zapkit-wallet-ui
+
+Teaches your AI assistant how to build wallet and DeFi interfaces using ZapKit registry components and shadcn composition patterns.
+
+## Install
+
+```bash
+npx skills add dngbuilds/zapkit --skill zapkit-wallet-ui
+```
+
+## What your AI learns
+
+### Component Installation
+
+- Using the ZapKit shadcn registry to install components
+- Proper `npx shadcn@latest add` commands with the registry URL
+- Understanding component vs block types
+- Customising installed components (they're your code now)
+
+### Composition Patterns
+
+- Building wallet connection flows with `ConnectWalletButton`
+- Composing `WalletCard` with custom balance fetchers
+- Combining `AddressBadge`, `NetworkBadge`, and `TokenAmount` in custom layouts
+- Transaction status tracking with `TransactionStatus`
+
+### Styling & Theming
+
+- Tailwind v4 + shadcn/ui theming
+- Dark mode support via CSS variables
+- Responsive wallet UI patterns
+- Accessible keyboard navigation and ARIA labels
+
+### Advanced UI Patterns
+
+- Optimistic UI updates after transactions
+- Skeleton loading states for async data
+- Toast notifications for transaction events
+- Modal vs inline wallet connection flows
+
+## Rules included
+
+| Rule               | Priority | Description                                                                  |
+| ------------------ | -------- | ---------------------------------------------------------------------------- |
+| `registry-install` | CRITICAL | Always use `npx shadcn@latest add <registry-url>` — never copy code manually |
+| `import-paths`     | HIGH     | Import from `@/components/<name>` — components are local, not from a package |
+| `composition`      | HIGH     | Use compound component patterns; avoid boolean prop proliferation            |
+| `loading-states`   | MEDIUM   | Always show skeleton/spinner during async operations                         |
+| `accessibility`    | MEDIUM   | Wallet buttons must be keyboard-accessible; use proper ARIA labels           |
+| `responsive`       | LOW      | Wallet UI should work on mobile; use responsive card layouts                 |
+
+## Example prompt
+
+> "Add a wallet sidebar to my Next.js app that shows the connected address and token balances"
+
+Without skill — AI might import from `@zapkit/ui` (deprecated) or write components from scratch.
+With skill — AI runs `npx shadcn@latest add .../r/wallet-card.json`, then composes the block with `useWallet()` from `@dngbuilds/zapkit-react`.
+
+## Pairs well with
+
+This skill works best alongside:
+
+- **zapkit-starknet** — For wallet connection logic
+- **zapkit-defi** — For DeFi transaction patterns
+
+```bash
+npx skills add dngbuilds/zapkit --all
+```

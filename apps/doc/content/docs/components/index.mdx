@@ -1,0 +1,41 @@
+---
+title: Components Overview
+description: Pre-built Starknet wallet & DeFi UI components, installable via the shadcn CLI.
+---
+
+# Components
+
+ZapKit ships a set of copy-paste React components distributed as a [shadcn registry](https://ui.shadcn.com/docs/registry).
+Instead of importing from a package, you install components directly into your project — giving you full ownership and the freedom to customise.
+
+## Installation
+
+Use the shadcn CLI to add any component:
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/<component-name>.json"
+```
+
+The CLI will:
+
+1. Copy the component source into your project
+2. Install required shadcn primitives (button, card, tooltip, etc.)
+3. Install npm dependencies (`@dngbuilds/zapkit-react`, etc.)
+
+## Available components
+
+### Connect
+
+| Component                                                     | Type      | Description                                                   |
+| ------------------------------------------------------------- | --------- | ------------------------------------------------------------- |
+| [ConnectWalletButton](/docs/components/connect-wallet-button) | Component | Smart button handling the full connect / disconnect lifecycle |
+| [AddressBadge](/docs/components/address-badge)                | Component | Truncated address badge with tooltip & copy-on-click          |
+| [NetworkBadge](/docs/components/network-badge)                | Component | Colored badge for mainnet / sepolia / devnet                  |
+| [WalletCard](/docs/components/wallet-card)                    | Block     | Card showing address, network, balances & disconnect          |
+
+### Common
+
+| Component                                                | Type      | Description                                                |
+| -------------------------------------------------------- | --------- | ---------------------------------------------------------- |
+| [TokenAmount](/docs/components/token-amount)             | Component | Formatted token amount with optional USD tooltip           |
+| [TransactionStatus](/docs/components/transaction-status) | Component | Inline alert for pending / confirmed / failed transactions |

@@ -1,0 +1,735 @@
+---
+title: "@dngbuilds/zapkit-react"
+description: React provider, hooks, and Vite plugin for ZapKit — Starknet wallet, DeFi, and UI building blocks.
+---
+
+# @dngbuilds/zapkit-react
+
+The single package you need to build on Starknet. Includes a React provider, hooks for every DeFi operation, the `ZapKit` wallet class, and the Vite plugin for bundler compatibility.
+
+## Installation
+
+```bash
+npm install @dngbuilds/zapkit-react
+```
+
+---
+
+## ZapProvider
+
+Wrap your app at the root level. All hooks must be used inside `ZapProvider`.
+
+```tsx
+import { ZapProvider } from "@dngbuilds/zapkit-react";
+
+export default function App({ children }: { children: React.ReactNode }) {
+  return <ZapProvider config={{ network: "mainnet" }}>{children}</ZapProvider>;
+}
+```
+
+### Config options
+
+| Prop           | Type                     | Default      | Description                       |
+| -------------- | ------------------------ | ------------ | --------------------------------- |
+| `network`      | `"mainnet" \| "sepolia"` | `"sepolia"`  | Starknet network                  |
+| `queryClient`  | `QueryClient`            | auto-created | Custom TanStack Query client      |
+| `showDevPanel` | `boolean`                | `false`      | Show the ZapKit dev panel overlay |
+
+---
+
+## Wallet
+
+### `useWallet()`
+
+Core hook for wallet connection and account state.
+
+```tsx
+import { useWallet } from "@dngbuilds/zapkit-react";
+
+function WalletButton() {
+  const {
+    wallet,
+    status, // "idle" | "connecting" | "connected" | "error"
+    isLoading,
+    error,
+    connectSigner, // Argent / Braavos browser wallet
+    connectPrivy, // social login via Privy
+    connectCartridge, // Cartridge Controller (gaming / session keys)
+    disconnect,
+  } = useWallet();
+
+  if (status === "connected") {
+    return (
+      <div>
+        <p>{wallet?.address}</p>
+        <button onClick={disconnect}>Disconnect</button>
+      </div>
+    );
+  }
+
+  return (
+    <button onClick={connectSigner} disabled={isLoading}>
+      {isLoading ? "Connecting…" : "Connect Wallet"}
+    </button>
+  );
+}
+```
+
+#### Return value
+
+| Field              | Type                                               | Description                                     |
+| ------------------ | -------------------------------------------------- | ----------------------------------------------- |
+| `wallet`           | `ZapWallet \| null`                                | Connected wallet instance                       |
+| `status`           | `"idle" \| "connecting" \| "connected" \| "error"` | Current connection state                        |
+| `isLoading`        | `boolean`                                          | `true` while connecting                         |
+| `error`            | `Error \| null`                                    | Last connection error                           |
+| `connectSigner`    | `() => Promise<void>`                              | Connect via browser extension (Argent, Braavos) |
+| `connectPrivy`     | `() => Promise<void>`                              | Connect via Privy social login                  |
+| `connectCartridge` | `(opts?) => Promise<void>`                         | Connect via Cartridge Controller                |
+| `disconnect`       | `() => void`                                       | Disconnect and clear state                      |
+
+---
+
+### `useNetwork()`
+
+Returns the active Starknet network name.
+
+```tsx
+import { useNetwork } from "@dngbuilds/zapkit-react";
+
+const network = useNetwork(); // "mainnet" | "sepolia"
+```
+
+---
+
+### `useBalance(token)`
+
+Reactive token balance query. Refetches every 30 seconds.
+
+```tsx
+import { useBalance, usePresetTokens } from "@dngbuilds/zapkit-react";
+
+function Balance() {
+  const tokens = usePresetTokens();
+  const { data: balance, isLoading } = useBalance(tokens.ETH);
+
+  if (isLoading) return <span>Loading…</span>;
+  return <span>{balance?.formatted} ETH</span>;
+}
+```
+
+---
+
+### `usePresetTokens()`
+
+Returns known tokens for the current network as a `Record<string, Token>`.
+
+```tsx
+import { usePresetTokens } from "@dngbuilds/zapkit-react";
+
+const tokens = usePresetTokens();
+// tokens.ETH, tokens.USDC, tokens.STRK, etc.
+```
+
+---
+
+## Swaps
+
+### `useSwap()`
+
+All-in-one hook for token swap flows. Combines quote fetching and swap execution.
+
+```tsx
+import { useSwap, usePresetTokens } from "@dngbuilds/zapkit-react";
+import { Amount } from "@dngbuilds/zapkit-react";
+
+function SwapPanel() {
+  const tokens = usePresetTokens();
+  const { getQuote, isQuoting, quote, quoteError, swap, isSwapping, swapError, lastTx } = useSwap();
+
+  const handleSwap = async () => {
+    const q = await getQuote({
+      tokenIn: tokens.ETH,
+      tokenOut: tokens.USDC,
+      amountIn: Amount.parse("0.01", tokens.ETH),
+      slippageBps: 50, // 0.5%
+    });
+    if (q) await swap({ quote: q });
+  };
+
+  return (
+    <button onClick={handleSwap} disabled={isQuoting || isSwapping}>
+      {isQuoting ? "Getting quote…" : isSwapping ? "Swapping…" : "Swap"}
+    </button>
+  );
+}
+```
+
+#### Return value
+
+| Field                | Type                          | Description                   |
+| -------------------- | ----------------------------- | ----------------------------- |
+| `getQuote`           | `(req) => Promise<SwapQuote>` | Imperatively fetch a quote    |
+| `isQuoting`          | `boolean`                     | Quote in-flight               |
+| `quote`              | `SwapQuote \| null`           | Last successful quote         |
+| `quoteError`         | `Error \| null`               | Last quote error              |
+| `swap`               | `(req) => Promise<Tx>`        | Execute a swap from a quote   |
+| `isSwapping`         | `boolean`                     | Swap tx in-flight             |
+| `swapError`          | `Error \| null`               | Last swap error               |
+| `lastTx`             | `Tx \| null`                  | Last confirmed transaction    |
+| `listProviders`      | `() => string[]`              | List registered DEX providers |
+| `registerProvider`   | `(id, fn) => void`            | Register a custom DEX         |
+| `setDefaultProvider` | `(id) => void`                | Set the default DEX           |
+
+---
+
+### `useGetQuoteQuery(request, options?)`
+
+Reactive (auto-fetching) quote query. Refetches when the request changes.
+
+```tsx
+import { useGetQuoteQuery } from "@dngbuilds/zapkit-react";
+
+const { data: quote, isLoading } = useGetQuoteQuery({
+  tokenIn: tokens.ETH,
+  tokenOut: tokens.USDC,
+  amountIn: Amount.parse("1", tokens.ETH),
+  slippageBps: 100,
+});
+```
+
+---
+
+### `useGetQuoteMutation()`
+
+Imperative quote fetcher (call on demand, e.g. on button click).
+
+```tsx
+const { getQuote, isQuoting, quoteError, quote } = useGetQuoteMutation();
+await getQuote({ tokenIn, tokenOut, amountIn, slippageBps: 50 });
+```
+
+---
+
+### `useSwapMutation()`
+
+Execute a swap from a preloaded quote.
+
+```tsx
+const { swap, isSwapping, swapError, lastTx, reset } = useSwapMutation();
+await swap({ quote });
+```
+
+---
+
+## DCA (Dollar-Cost Averaging)
+
+### `useDcaOrdersQuery(input?, options?)`
+
+Fetch all DCA orders for the connected wallet.
+
+```tsx
+import { useDcaOrdersQuery } from "@dngbuilds/zapkit-react";
+
+const { data: orders, isLoading } = useDcaOrdersQuery();
+```
+
+---
+
+### `useCreateDcaMutation()`
+
+Create a new recurring DCA order.
+
+```tsx
+import { useCreateDcaMutation, usePresetTokens } from "@dngbuilds/zapkit-react";
+import { Amount } from "@dngbuilds/zapkit-react";
+
+function DcaForm() {
+  const tokens = usePresetTokens();
+  const { createOrder, isCreating, createError, lastTx } = useCreateDcaMutation();
+
+  const handleCreate = () =>
+    createOrder({
+      tokenIn: tokens.USDC,
+      tokenOut: tokens.ETH,
+      amountPerCycle: Amount.parse("10", tokens.USDC),
+      intervalSeconds: 86400, // daily
+      cycles: 30,
+    });
+
+  return (
+    <button onClick={handleCreate} disabled={isCreating}>
+      Start DCA
+    </button>
+  );
+}
+```
+
+#### Return value
+
+| Field         | Type                   | Description            |
+| ------------- | ---------------------- | ---------------------- |
+| `createOrder` | `(req) => Promise<Tx>` | Create a new DCA order |
+| `isCreating`  | `boolean`              | Tx in-flight           |
+| `createError` | `Error \| null`        | Error                  |
+| `lastTx`      | `Tx \| null`           | Confirmed tx           |
+| `reset`       | `() => void`           | Clear state            |
+
+---
+
+### `useCancelDcaMutation()`
+
+Cancel an active DCA order.
+
+```tsx
+const { cancelOrder, isCanceling, cancelError } = useCancelDcaMutation();
+await cancelOrder({ orderId: "0x..." });
+```
+
+---
+
+### `usePreviewDcaCycleMutation()`
+
+Preview what one DCA cycle would buy before creating an order.
+
+```tsx
+const { previewCycle, isPreviewing, preview } = usePreviewDcaCycleMutation();
+const result = await previewCycle({ tokenIn, tokenOut, amountPerCycle });
+```
+
+---
+
+## Staking
+
+### `useStakingPools()`
+
+Query all available staking pools across all validators for the current network.
+
+```tsx
+import { useStakingPools } from "@dngbuilds/zapkit-react";
+
+function PoolList() {
+  const { pools, validators, isLoading } = useStakingPools();
+
+  return pools.map(({ pool, validator }) => (
+    <div key={pool.address}>
+      {validator.name} — {pool.apr}% APR
+    </div>
+  ));
+}
+```
+
+---
+
+### `useStakingTokens()`
+
+Returns tokens that can be staked on the current network.
+
+```tsx
+const { data: tokens } = useStakingTokens();
+```
+
+---
+
+### `useStaking()`
+
+All-in-one staking hook. Includes all mutations and imperative position helpers.
+
+```tsx
+import { useStaking } from "@dngbuilds/zapkit-react";
+
+function StakingPanel({ poolAddress }) {
+  const {
+    stake,
+    isStaking,
+    addToPool,
+    isAddingToPool,
+    claimReward,
+    isClaiming,
+    exitIntent,
+    isExitingIntent,
+    exitPool,
+    isExiting,
+    getPosition,
+    isPending,
+    error,
+  } = useStaking();
+
+  return (
+    <button onClick={() => stake({ poolAddress, amount })} disabled={isPending}>
+      Stake
+    </button>
+  );
+}
+```
+
+#### Key fields
+
+| Field           | Type                                           | Description                                      |
+| --------------- | ---------------------------------------------- | ------------------------------------------------ |
+| `stake`         | `(req) => Promise<Tx>`                         | Enter pool (auto-detects enter vs add)           |
+| `addToPool`     | `(req) => Promise<Tx>`                         | Add more to an existing pool position            |
+| `claimReward`   | `(poolAddress) => Promise<Tx>`                 | Claim accumulated staking rewards                |
+| `exitIntent`    | `(req) => Promise<Tx>`                         | Declare exit intent — starts the cooldown window |
+| `exitPool`      | `(poolAddress) => Promise<Tx>`                 | Complete withdrawal after cooldown has passed    |
+| `getPosition`   | `(poolAddress) => Promise<PoolMember \| null>` | Fetch your position in a pool                    |
+| `getCommission` | `(poolAddress) => Promise<number>`             | Pool commission rate                             |
+| `isPoolMember`  | `(poolAddress) => Promise<boolean>`            | Check if you're in the pool                      |
+| `isPending`     | `boolean`                                      | Any mutation in-flight                           |
+| `error`         | `Error \| null`                                | Last error from any mutation                     |
+
+---
+
+### Standalone staking hooks
+
+For fine-grained control, use the individual mutation hooks directly:
+
+| Hook                       | Returns                                            |
+| -------------------------- | -------------------------------------------------- |
+| `useStakeMutation()`       | `{ stake, isStaking, stakeError }`                 |
+| `useAddToPoolMutation()`   | `{ addToPool, isAddingToPool, addToPoolError }`    |
+| `useClaimRewardMutation()` | `{ claimReward, isClaiming, claimError }`          |
+| `useExitIntentMutation()`  | `{ exitIntent, isExitingIntent, exitIntentError }` |
+| `useExitPoolMutation()`    | `{ exitPool, isExiting, exitError }`               |
+
+---
+
+## Bridge
+
+### `useBridge()`
+
+All-in-one bridge hook for cross-chain deposits.
+
+```tsx
+import { useBridge } from "@dngbuilds/zapkit-react";
+
+function BridgePanel() {
+  const {
+    deposit,
+    isDepositing,
+    depositError,
+    getEthWallet,
+    getSolanaWallet,
+    getDepositBalance,
+    getAllowance,
+    getFeeEstimate,
+  } = useBridge();
+
+  return (
+    <button onClick={() => deposit({ token, amount, targetAddress })} disabled={isDepositing}>
+      Bridge to Starknet
+    </button>
+  );
+}
+```
+
+#### Return value
+
+| Field               | Type                                  | Description                              |
+| ------------------- | ------------------------------------- | ---------------------------------------- |
+| `deposit`           | `(req) => Promise<Tx>`                | Execute bridge deposit to Starknet       |
+| `isDepositing`      | `boolean`                             | Tx in-flight                             |
+| `depositError`      | `Error \| null`                       | Last error                               |
+| `getEthWallet`      | `() => ethers.Signer`                 | Get connected Ethereum signer            |
+| `getSolanaWallet`   | `() => SolanaAdapter`                 | Get connected Solana wallet              |
+| `getDepositBalance` | `(token) => Promise<Amount>`          | Check bridgeable balance on source chain |
+| `getAllowance`      | `(token) => Promise<Amount>`          | Check bridge contract ERC-20 allowance   |
+| `getFeeEstimate`    | `(req) => Promise<BridgeFeeEstimate>` | Estimate bridge fees                     |
+
+---
+
+### `useBridgeInfo()`
+
+Detects connected browser wallets (EVM and Solana) and maps Starknet network IDs to EVM chain IDs.
+
+```tsx
+import { useBridgeInfo } from "@dngbuilds/zapkit-react";
+
+const {
+  evmChainId, // e.g. "0x1" for mainnet, "0xaa36a7" for Sepolia
+  ethProvider, // window.ethereum provider (if available)
+  solanaProvider, // window.solana / Phantom (if available)
+  isBrowserEvm,
+  isBrowserSolana,
+} = useBridgeInfo();
+```
+
+---
+
+### Token query hooks
+
+| Hook                        | Description                                   |
+| --------------------------- | --------------------------------------------- |
+| `useAllBridgeTokens()`      | All supported bridge tokens (staleTime 5 min) |
+| `useEthereumBridgeTokens()` | Tokens originating from Ethereum              |
+| `useSolanaBridgeTokens()`   | Tokens originating from Solana                |
+
+---
+
+## Lending
+
+### `useLendingMarketsQuery(options?)`
+
+Fetch all available Vesu lending markets.
+
+```tsx
+import { useLendingMarketsQuery } from "@dngbuilds/zapkit-react";
+
+function Markets() {
+  const { data: markets, isLoading } = useLendingMarketsQuery();
+  return markets?.map((m) => (
+    <div key={m.id}>
+      {m.name} — {m.supplyApy}% APY
+    </div>
+  ));
+}
+```
+
+---
+
+### `useLendingUserPositionsQuery(request?, options?)`
+
+Fetch all active lending positions (both earn and borrow) for the connected wallet.
+
+```tsx
+const { data: positions } = useLendingUserPositionsQuery();
+// positions.earn → supplied tokens
+// positions.borrow → active loans
+```
+
+---
+
+### `useLendingPositionQuery(request)`
+
+Fetch a single position for a specific collateral/debt token pair.
+
+```tsx
+const { data: position } = useLendingPositionQuery({
+  collateralToken: tokens.ETH,
+  debtToken: tokens.USDC,
+  provider: "vesu",
+});
+```
+
+---
+
+### `useLendingHealthQuery(request)`
+
+Real-time health factor query. Refetches every 15 seconds. Use to warn users before liquidation.
+
+```tsx
+const { data: health } = useLendingHealthQuery({
+  collateralToken: tokens.ETH,
+  debtToken: tokens.USDC,
+});
+
+if (health && !health.isCollateralized) {
+  // show liquidation warning
+}
+```
+
+---
+
+### Lending mutation hooks
+
+| Hook                              | Returns                                                              | Description                                 |
+| --------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| `useLendingDepositMutation()`     | `{ deposit, isDepositing, depositError, lastTx, reset }`             | Supply tokens to earn interest              |
+| `useLendingWithdrawMutation()`    | `{ withdraw, isWithdrawing, withdrawError, lastTx, reset }`          | Withdraw a specific amount                  |
+| `useLendingWithdrawMaxMutation()` | `{ withdrawMax, isWithdrawingMax, withdrawMaxError, lastTx, reset }` | Withdraw full balance                       |
+| `useBorrowMutation()`             | `{ borrow, isBorrowing, borrowError, lastTx, reset }`                | Borrow against collateral                   |
+| `useRepayMutation()`              | `{ repay, isRepaying, repayError, lastTx, reset }`                   | Repay debt (optionally withdraw collateral) |
+
+#### Example — full borrow + repay flow
+
+```tsx
+import {
+  useLendingDepositMutation,
+  useBorrowMutation,
+  useRepayMutation,
+  useLendingHealthQuery,
+  usePresetTokens,
+} from "@dngbuilds/zapkit-react";
+import { Amount } from "@dngbuilds/zapkit-react";
+
+function LendingPanel() {
+  const tokens = usePresetTokens();
+  const { deposit } = useLendingDepositMutation();
+  const { borrow } = useBorrowMutation();
+  const { repay } = useRepayMutation();
+  const { data: health } = useLendingHealthQuery({
+    collateralToken: tokens.ETH,
+    debtToken: tokens.USDC,
+  });
+
+  return (
+    <div>
+      <p>Health factor: {health?.factor?.toFixed(2)}</p>
+      <button
+        onClick={() =>
+          deposit({ request: { token: tokens.ETH, amount: Amount.parse("1", tokens.ETH) } })
+        }
+      >
+        Deposit 1 ETH
+      </button>
+      <button
+        onClick={() =>
+          borrow({
+            request: {
+              collateralToken: tokens.ETH,
+              debtToken: tokens.USDC,
+              amount: Amount.parse("500", tokens.USDC),
+            },
+          })
+        }
+      >
+        Borrow 500 USDC
+      </button>
+      <button
+        onClick={() =>
+          repay({
+            request: {
+              collateralToken: tokens.ETH,
+              debtToken: tokens.USDC,
+              amount: Amount.parse("500", tokens.USDC),
+              withdrawCollateral: true,
+            },
+          })
+        }
+      >
+        Repay & Withdraw
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## ZapKit Class
+
+The `ZapKit` class is the low-level wallet wrapper around the StarkZap SDK. `useWallet()` exposes the connected instance as `wallet`. You can also instantiate it directly for scripts or server-side usage.
+
+```ts
+import { ZapKit, type ZapKitConfig } from "@dngbuilds/zapkit-react";
+
+const config: ZapKitConfig = { network: "mainnet" };
+const kit = new ZapKit(config);
+
+// Onboard (connect) the wallet
+await kit.onboard({ strategy: "signer" });
+
+// Execute a multicall
+await kit.callContract([
+  { contractAddress: "0x...", entrypoint: "approve", calldata: ["0x...", "1000", "0"] },
+  { contractAddress: "0x...", entrypoint: "transfer", calldata: ["0x...", "1000", "0"] },
+]);
+
+// Disconnect
+kit.disconnect();
+```
+
+---
+
+## Vite Plugin
+
+`zapkitPlugin()` ensures the StarkZap bundle works in your Vite/Rolldown project. It:
+
+- Shims optional starkzap peer dependencies to no-ops so your app bundles without errors
+- Patches ethers v5 → v6 compatibility for transitive dependencies that still use the old `utils` namespace
+
+### Setup
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import { zapkitPlugin } from "@dngbuilds/zapkit-react/vite";
+
+export default defineConfig({
+  plugins: [zapkitPlugin()],
+});
+```
+
+### Options
+
+```ts
+zapkitPlugin({
+  // Custom shim overrides (advanced)
+  shims?: Record<string, string>;
+});
+```
+
+> The plugin handles both the main build pass and `optimizeDeps` pre-bundling.
+> You do NOT need `@dngbuilds/zapkit-core` — the plugin is included here.
+
+---
+
+## Full export reference
+
+```ts
+// Provider & context
+export { ZapProvider, useZapContext } from "@dngbuilds/zapkit-react";
+
+// Wallet
+export { useWallet, useNetwork, useBalance, usePresetTokens } from "@dngbuilds/zapkit-react";
+
+// Swaps
+export {
+  useSwap,
+  useGetQuoteQuery,
+  useGetQuoteMutation,
+  useSwapMutation,
+} from "@dngbuilds/zapkit-react";
+
+// DCA
+export {
+  useDcaOrdersQuery,
+  useCreateDcaMutation,
+  useCancelDcaMutation,
+  usePreviewDcaCycleMutation,
+} from "@dngbuilds/zapkit-react";
+
+// Staking
+export {
+  useStaking,
+  useStakingPools,
+  useStakingTokens,
+  useStakeMutation,
+  useAddToPoolMutation,
+  useClaimRewardMutation,
+  useExitIntentMutation,
+  useExitPoolMutation,
+} from "@dngbuilds/zapkit-react";
+
+// Bridge
+export {
+  useBridge,
+  useBridgeInfo,
+  useAllBridgeTokens,
+  useEthereumBridgeTokens,
+  useSolanaBridgeTokens,
+} from "@dngbuilds/zapkit-react";
+
+// Lending
+export {
+  useLendingMarketsQuery,
+  useLendingUserPositionsQuery,
+  useLendingPositionQuery,
+  useLendingHealthQuery,
+  useLendingDepositMutation,
+  useLendingWithdrawMutation,
+  useLendingWithdrawMaxMutation,
+  useBorrowMutation,
+  useRepayMutation,
+} from "@dngbuilds/zapkit-react";
+
+// Core class
+export {
+  default as ZapKit,
+  type ZapKitConfig,
+  type ConnectCartridgeOptions,
+} from "@dngbuilds/zapkit-react";
+
+// Vite plugin (separate entry)
+export { zapkitPlugin } from "@dngbuilds/zapkit-react/vite";
+```

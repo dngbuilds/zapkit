@@ -1,0 +1,192 @@
+---
+title: What We're Building Next
+description: More components, sharper hooks, better DX — a look at the ZapKit roadmap and how you can shape it.
+---
+
+# What We're Building Next
+
+ZapKit is live. The hooks work. Developers are building on Starknet with it. That's the starting line, not the finish line.
+
+Here's what we're working toward — and why we think the best parts of ZapKit are still ahead.
+
+---
+
+## More UI Components
+
+Right now ZapKit ships wallet primitives: `connect-wallet-button`, `wallet-card`, `address-badge`, `network-badge`. Useful, but small.
+
+The next wave of components:
+
+### Transaction Components
+
+- **`tx-toast`** — a toast notification that tracks a Starknet tx from submitted → confirmed → failed, with real-time status updates
+- **`tx-history`** — a paginated list of recent transactions with status icons and links to Starkscan
+- **`pending-tx-badge`** — a persistent badge that appears while any tx is in-flight
+
+### DeFi Components
+
+- **`token-input`** — a token amount input with balance display, max button, and USD price preview
+- **`token-select`** — searchable token picker with logos, symbols, and balances
+- **`swap-card`** — a complete swap UI: input token, output token, slippage config, rate display, one-click execute
+- **`position-card`** — show a user's staking or lending position with live P&L
+- **`pool-list`** — browsable list of staking or lending pools with APR, TVL, and a stake button
+- **`health-bar`** — a visual health factor indicator for lending positions (green → red gradient)
+
+### Wallet UX Components
+
+- **`privy-login`** — social login flow built on top of Privy (email, Google, Twitter)
+- **`cartridge-connect`** — a Cartridge Controller connection modal with session key display
+- **`account-settings`** — address copy, network switch, disconnect button
+
+All components will follow the same pattern: install into your project as source files via `npx shadcn@latest add`, fully themeable with Tailwind, WAI-ARIA accessible.
+
+---
+
+## Sharper Agent Skills
+
+The three current ZapKit skills (`zapkit-starknet`, `zapkit-defi`, `zapkit-wallet-ui`) cover the basics. But AI assistants need more than basics to write production-quality Starknet code.
+
+Coming next:
+
+### `zapkit-transactions`
+
+Deep knowledge on multicall batching, felt252 encoding, Cairo error handling, and gas estimation patterns.
+
+### `zapkit-components`
+
+Every shadcn component ZapKit ships — usage, props, composition, theming. Ask Copilot "add a swap card here" and it runs the right command with the right imports.
+
+### `zapkit-advanced`
+
+Patterns for session keys, custom account contracts, signature verification, and cross-chain bridging flows.
+
+### Auto-updating skills
+
+We're exploring a skill that fetches the latest API surface from the ZapKit registry at query time — so AI assistants always have up-to-date signatures, even on new hook releases.
+
+---
+
+## Better React Hooks
+
+The current hooks are functional but sometimes verbose. Improvements planned:
+
+### Easier composition
+
+Today you need `useGetQuoteMutation` + `useSwapMutation` separately if you want fine-grained control. We're adding helper utilities to make common compositions feel natural.
+
+### Optimistic updates
+
+Right now, mutations wait for on-chain confirmation before updating the UI. We'll add optimistic update support so UIs feel instant while the tx confirms in the background.
+
+### Better error surfaces
+
+Cairo error messages are opaque by default. We're building an error decode layer that translates `0x50415353` into human-readable messages ("Insufficient allowance," "Amount too low," etc.).
+
+### `useWatchTx(txHash)`
+
+Subscribe to transaction status updates reactively. The component re-renders at each status change — pending → accepted_on_l2 → accepted_on_l1.
+
+### `useLendingPortfolio()`
+
+A composed hook that aggregates all lending positions, total supplied value, total borrowed, net APY, and overall health factor in one call.
+
+### useStakingPortfolio()
+
+Similar — aggregate staking positions across all pools: total staked, pending rewards, earliest exit window.
+
+---
+
+## Stability: v1.0
+
+ZapKit is in active development. The APIs are functional but not yet frozen. Before we tag `v1.0.0`, we want to:
+
+- [ ] **Stabilize hook signatures** — no more breaking changes to hook return shapes
+- [ ] **Full TypeScript coverage** — every hook fully typed, every response type exported and documented
+- [ ] **Test suite expansion** — integration tests against Starknet Sepolia for all mutations
+- [ ] **Bundle size audit** — tree-shaking verification, lazy loading for heavy deps
+- [ ] **Docs coverage to 100%** — every exported symbol with a description, type signature, and example
+- [ ] **Changelog discipline** — semver strictly, migration guides for any breaking change
+
+We're targeting a stable v1.0 with a proper upgrade path from the current 0.x releases.
+
+---
+
+## Developer Tooling
+
+### ZapKit DevTools (browser extension)
+
+A browser devtools panel that shows:
+
+- Active wallet connection details (address, network, wallet type)
+- All mounted ZapKit hooks and their current state
+- Transaction history with decoded calldata
+- Query cache inspector
+
+Think TanStack Query Devtools, but purpose-built for Starknet.
+
+### Scaffolding CLI
+
+```bash
+npx create-zapkit-app my-dapp
+```
+
+A project scaffolder that wires up `ZapProvider`, the Vite plugin, a sample wallet button, and installs agent skills — all in one command.
+
+### Storybook integration
+
+A Storybook addon that provides `ZapProvider` wrapper with mock wallet state presets (idle, connecting, connected with Argent, connected with Cartridge, error state) — so you can develop UI components without a real wallet.
+
+---
+
+## Community
+
+We want ZapKit to be community-built, not just community-used.
+
+### Component registry contributions
+
+The long-term vision: anyone can publish a ZapKit component to the registry — just like shadcn allows — and others can install it with a single `npx shadcn@latest add` command. Imagine a shared library of Starknet DeFi UX patterns built by the whole ecosystem.
+
+### Skills contributions
+
+If you've found a pattern that makes AI assistants better at Starknet code — we want it in the skills library. We're building a contribution guide and review process.
+
+### Feedback, always
+
+The biggest thing that will shape v1.0 is hearing what's broken, missing, or confusing for real developers. Open a [GitHub issue](https://github.com/dngbuilds/zapkit/issues), start a discussion, or just drop a message.
+
+---
+
+## The Big Picture
+
+ZapKit is infrastructure for a future where:
+
+- Every Starknet dApp has good wallet UX out of the box
+- AI coding assistants know Starknet as well as they know React
+- Building a privacy-preserving, account-abstracted app is as approachable as building a Next.js site
+
+We're not there yet. But every component, every hook, every skill we ship moves the needle.
+
+If that future sounds worth building toward, we'd love your help getting there.
+
+---
+
+## Get Involved
+
+**Use it. Break it. Tell us:**
+
+- [GitHub Issues](https://github.com/dngbuilds/zapkit/issues) — bug reports, feature requests
+- [Discussions](https://github.com/dngbuilds/zapkit/discussions) — ideas, questions, patterns
+- [Contribute](https://github.com/dngbuilds/zapkit/blob/main/CONTRIBUTING.md) — PRs welcome
+
+**Start building today:**
+
+```bash
+npm install @dngbuilds/zapkit-react
+npx skills add dngbuilds/zapkit
+```
+
+The roadmap above is a direction, not a promise. What gets built next depends on what builders actually need. That part is up to you.
+
+---
+
+_ZapKit is MIT licensed. Built by [DngBuilds](https://github.com/dngbuilds)._

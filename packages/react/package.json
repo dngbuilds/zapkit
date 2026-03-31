@@ -1,0 +1,72 @@
+{
+  "name": "@dngbuilds/zapkit-react",
+  "version": "0.1.5",
+  "description": "React hooks and provider for Starknet — wallet connection in minutes, not hours.",
+  "keywords": [
+    "defi",
+    "hooks",
+    "react",
+    "starknet",
+    "wallet",
+    "web3",
+    "zapkit"
+  ],
+  "homepage": "https://zapkit.vercel.app",
+  "bugs": {
+    "url": "https://github.com/DngBuilds/zapkit/issues"
+  },
+  "license": "MIT",
+  "author": "DngBuilds <dng.builds@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DngBuilds/zapkit.git",
+    "directory": "packages/react"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./vite": "./dist/vite.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./vite": "./dist/vite.mjs",
+      "./package.json": "./package.json"
+    },
+    "main": "./dist/index.mjs",
+    "types": "./dist/index.d.mts"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "dependencies": {
+    "@cartridge/controller": "^0.13.9",
+    "@hyperlane-xyz/registry": "^24.2.0",
+    "@hyperlane-xyz/sdk": "^29.1.0",
+    "@hyperlane-xyz/utils": "^29.1.0",
+    "@solana/web3.js": "^1.98.4",
+    "@tanstack/react-query": "^5.95.2",
+    "ethers": "^6.16.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "starkzap": "latest"
+  },
+  "devDependencies": {
+    "@fatsolutions/tongo-sdk": "catalog:",
+    "@types/node": "^25.5.0",
+    "@types/react": "catalog:",
+    "@typescript/native-preview": "7.0.0-dev.20260316.1",
+    "bumpp": "^11.0.1",
+    "typescript": "^5.9.3",
+    "vite-plus": "^0.1.11"
+  }
+}

@@ -1,0 +1,60 @@
+---
+title: "zapkit-starknet"
+description: Starknet wallet integration patterns for AI coding assistants.
+---
+
+# zapkit-starknet
+
+Teaches your AI assistant how to properly integrate Starknet wallets using ZapKit.
+
+## Install
+
+```bash
+npx skills add dngbuilds/zapkit --skill zapkit-starknet
+```
+
+## What your AI learns
+
+### Wallet Connection
+
+- Proper `ZapProvider` setup and configuration
+- Using `useConnect()`, `useWallet()`, and `useZapKit()` hooks correctly
+- Handling all connection states (idle, connecting, connected, error)
+- Multi-strategy onboarding: Cartridge Controller, Stark Signer, Privy
+
+### Account Management
+
+- Reading wallet address and StarkNet ID
+- Handling account switching and disconnection
+- Proper cleanup on disconnect (async teardown)
+
+### Transaction Building
+
+- Using the `TxBuilder` API from `@dngbuilds/zapkit-core`
+- Multicall patterns for batching transactions
+- Error handling and retry logic
+- Gas estimation best practices
+
+### Network Configuration
+
+- Mainnet vs Sepolia vs Devnet setup
+- Chain ID handling with `ChainId` enum
+- RPC endpoint configuration
+- Network-specific contract addresses
+
+## Rules included
+
+| Rule                   | Priority | Description                                                        |
+| ---------------------- | -------- | ------------------------------------------------------------------ |
+| `wallet-connect`       | CRITICAL | Always wrap app with `ZapProvider`; use hooks not direct SDK calls |
+| `transaction-building` | HIGH     | Use `TxBuilder` for multicall; always estimate gas first           |
+| `error-handling`       | HIGH     | Handle `UserRejectedRequestError` separately from network errors   |
+| `network-config`       | MEDIUM   | Use `ChainId` enum, never hardcode chain IDs                       |
+| `account-lifecycle`    | MEDIUM   | Always call `disconnect()` before switching strategies             |
+
+## Example prompt
+
+> "Connect a Starknet wallet with Cartridge Controller and show the user's address"
+
+Without skill — AI might use an outdated Starknet.js pattern.
+With skill — AI uses `ZapProvider` + `useWallet()` + `ConnectWalletButton` from the registry.

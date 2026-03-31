@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "address-badge",
+  "title": "AddressBadge",
+  "description": "Inline address badge with tooltip showing the full address and copy-on-click.",
+  "registryDependencies": [
+    "tooltip",
+    "badge"
+  ],
+  "files": [
+    {
+      "path": "registry/new-york/address-badge/address-badge.tsx",
+      "content": "\"use client\";\n\nimport { useState, useCallback } from \"react\";\nimport {\n  Tooltip,\n  TooltipContent,\n  TooltipProvider,\n  TooltipTrigger,\n} from \"@/components/ui/tooltip\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface AddressBadgeProps {\n  /** Full Starknet address (0x…) */\n  address: string;\n  /** Resolved ENS / StarkNet ID displayed in place of the address */\n  ens?: string | null;\n  /** How many chars to keep at start/end when truncating. Defaults: 6/4 */\n  truncate?: { start?: number; end?: number };\n  /** Show a copy-to-clipboard action. Default: true */\n  showCopy?: boolean;\n  className?: string;\n}\n\nfunction truncateAddr(address: string, start = 6, end = 4): string {\n  if (address.length <= start + end + 3) return address;\n  return `${address.slice(0, start)}…${address.slice(-end)}`;\n}\n\n/**\n * Inline address badge with tooltip (full address) and copy-on-click.\n *\n * @example\n * ```tsx\n * <AddressBadge address=\"0x049d36570d4e46f48e99674…\" />\n * <AddressBadge address=\"0x049d…\" ens=\"vitalik.stark\" />\n * ```\n */\nexport function AddressBadge({\n  address,\n  ens,\n  truncate: t,\n  showCopy = true,\n  className,\n}: AddressBadgeProps) {\n  const [copied, setCopied] = useState(false);\n\n  const handleCopy = useCallback(async () => {\n    if (!showCopy) return;\n    try {\n      await navigator.clipboard.writeText(address);\n      setCopied(true);\n      setTimeout(() => setCopied(false), 1500);\n    } catch {\n      /* clipboard not available */\n    }\n  }, [address, showCopy]);\n\n  const display = ens ?? truncateAddr(address, t?.start, t?.end);\n\n  return (\n    <TooltipProvider>\n      <Tooltip>\n        <TooltipTrigger>\n          <button\n            type=\"button\"\n            onClick={handleCopy}\n            aria-label={`Wallet address: ${address}. Click to copy.`}\n            className={cn(\n              \"inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 font-mono text-xs transition-colors hover:bg-muted\",\n              className\n            )}\n          >\n            <span\n              aria-hidden\n              className=\"size-1.5 rounded-full bg-emerald-500 shrink-0\"\n            />\n            {display}\n            {copied && (\n              <span className=\"text-emerald-500 text-xs\" aria-live=\"polite\">\n                ✓\n              </span>\n            )}\n          </button>\n        </TooltipTrigger>\n        <TooltipContent side=\"bottom\" className=\"font-mono text-xs\">\n          {ens && <p className=\"text-muted-foreground mb-0.5\">{ens}</p>}\n          <p className=\"break-all\">{address}</p>\n          {showCopy && (\n            <p className=\"mt-0.5 text-muted-foreground/70 text-[10px]\">\n              Click to copy\n            </p>\n          )}\n        </TooltipContent>\n      </Tooltip>\n    </TooltipProvider>\n  );\n}\n",
+      "type": "registry:component"
+    }
+  ],
+  "categories": [
+    "connect"
+  ],
+  "type": "registry:component"
+}

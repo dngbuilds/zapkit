@@ -1,0 +1,61 @@
+---
+title: TransactionStatus
+description: Inline alert showing transaction state — pending, confirmed, or failed.
+---
+
+# TransactionStatus
+
+An alert component that reflects the current state of a Starknet transaction with appropriate icons and styling.
+
+## Preview
+
+<TransactionStatusPreview />
+
+## Install
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/transaction-status.json"
+```
+
+This installs:
+
+- `transaction-status.tsx` into your components directory
+- shadcn primitives: `alert`, `spinner`
+- npm dependencies: `@hugeicons/react`, `@hugeicons/core-free-icons`
+
+## Usage
+
+```tsx
+import { TransactionStatus } from "@/components/transaction-status";
+
+{
+  /* Pending */
+}
+<TransactionStatus status="pending" message="Submitting transaction…" />;
+
+{
+  /* Confirmed */
+}
+<TransactionStatus status="confirmed" txHash="0xabc…123" />;
+
+{
+  /* Failed */
+}
+<TransactionStatus status="failed" message="Insufficient balance" />;
+```
+
+## Props
+
+| Prop          | Type                                   | Default    | Description                 |
+| ------------- | -------------------------------------- | ---------- | --------------------------- |
+| `status`      | `"pending" \| "confirmed" \| "failed"` | _required_ | Transaction state           |
+| `txHash`      | `string`                               | —          | Transaction hash to display |
+| `message`     | `string`                               | —          | Status message              |
+| `explorerUrl` | `string`                               | —          | Link to block explorer      |
+| `className`   | `string`                               | —          | Additional CSS classes      |
+
+## Visual states
+
+- **Pending** — Spinner icon, muted styling
+- **Confirmed** — Check icon, success (green) styling
+- **Failed** — Error icon, destructive (red) styling

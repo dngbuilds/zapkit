@@ -1,0 +1,55 @@
+---
+title: ZapKit Agent Skills
+description: AI-powered coding skills for Starknet wallet and DeFi development.
+---
+
+# ZapKit Agent Skills
+
+**Agent Skills** are reusable instruction sets that supercharge AI coding assistants (Copilot, Cursor, Windsurf, Codex, Claude Code, and [40+ more](https://skills.sh/)) with domain-specific knowledge. ZapKit provides Starknet-focused skills that help AI agents write better wallet integration, DeFi, and UI code.
+
+Skills are managed via the open [`skills`](https://skills.sh/) CLI — the same ecosystem used by Vercel, shadcn, and Microsoft.
+
+## Why skills?
+
+Without skills, AI assistants rely on general knowledge that may be outdated or wrong about Starknet specifics. With ZapKit skills installed, your AI assistant knows:
+
+- How to properly integrate Starknet wallets (Cartridge, Argent, Braavos)
+- Best practices for Cairo/Starknet transaction building
+- How to use ZapKit hooks and components correctly
+- DeFi patterns specific to Starknet (AMMs, lending, staking)
+- How to structure wallet UI following shadcn composition patterns
+
+## Available skills
+
+| Skill                                             | Description                          | Install command                                            |
+| ------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------- |
+| [zapkit-starknet](/docs/skills/zapkit-starknet)   | Starknet wallet integration patterns | `npx skills add dngbuilds/zapkit --skill zapkit-starknet`  |
+| [zapkit-defi](/docs/skills/zapkit-defi)           | DeFi building blocks for Starknet    | `npx skills add dngbuilds/zapkit --skill zapkit-defi`      |
+| [zapkit-wallet-ui](/docs/skills/zapkit-wallet-ui) | Wallet UI composition with shadcn    | `npx skills add dngbuilds/zapkit --skill zapkit-wallet-ui` |
+
+## Quick start
+
+```bash
+# List available skills in the ZapKit repo
+npx skills add dngbuilds/zapkit --list
+
+# Install a specific skill
+npx skills add dngbuilds/zapkit --skill zapkit-starknet
+
+# Install all ZapKit skills at once
+npx skills add dngbuilds/zapkit --all
+
+# Install to specific agents
+npx skills add dngbuilds/zapkit -a cursor -a claude-code
+```
+
+After installation, your AI assistant automatically uses these skills when working on relevant tasks.
+
+## How it works
+
+1. `npx skills add dngbuilds/zapkit` fetches skills from the [GitHub repo](https://github.com/dngbuilds/zapkit)
+2. The CLI installs `SKILL.md` files into your project's agent skill directories
+3. AI assistants automatically read these files as context when coding
+4. Skills are tracked on the [skills.sh leaderboard](https://skills.sh/) based on install count
+
+See the [Getting Started](/docs/skills/getting-started) guide for details.

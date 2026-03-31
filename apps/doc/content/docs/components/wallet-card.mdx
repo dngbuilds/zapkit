@@ -1,0 +1,100 @@
+---
+title: WalletCard
+description: A complete wallet overview card — address, network, balances, and disconnect action.
+---
+
+# WalletCard
+
+A card combining address display, network indicator, token balances, and a disconnect action.
+This is a **block** — it installs multiple files including its own address-badge, network-badge, and token-amount sub-components.
+
+## Preview
+
+<WalletCardPreview />
+
+## Install
+
+```bash
+npx shadcn@latest add "https://zapkit.vercel.app/r/wallet-card.json"
+```
+
+This installs:
+
+- `wallet-card.tsx` — Main WalletCard component
+- `address-badge.tsx` — Address display with copy
+- `network-badge.tsx` — Network indicator badge
+- `token-amount.tsx` — Formatted token amount
+- shadcn primitives: `card`, `button`, `separator`, `skeleton`, `tooltip`, `badge`
+- npm dependency: `@dngbuilds/zapkit-react`
+
+## Usage
+
+```tsx
+import { useWallet } from "@dngbuilds/zapkit-react";
+import { WalletCard } from "@/components/wallet-card";
+
+export function Sidebar() {
+  const { address, ens, disconnect } = useWallet();
+
+  if (!address) return null;
+
+  return (
+    <WalletCard
+      address={address}
+      ens={ens}
+      network="mainnet"
+      balances={[
+        { symbol: "ETH", amount: "1.234", usdValue: "3,702.00" },
+        { symbol: "STRK", amount: "10000" },
+      ]}
+      onDisconnect={disconnect}
+    />
+  );
+}
+```
+
+## Props
+
+| Prop           | Type                                 | Default     | Description                        |
+| -------------- | ------------------------------------ | ----------- | ---------------------------------- |
+| `address`      | `string`                             | _required_  | Connected wallet address           |
+| `ens`          | `string \| null`                     | `null`      | Resolved StarkNet ID               |
+| `network`      | `"mainnet" \| "sepolia" \| "devnet"` | `"mainnet"` | Starknet network                   |
+| `balances`     | `WalletBalance[]`                    | `[]`        | Token balances to display          |
+| `loading`      | `boolean`                            | `false`     | Show skeleton loading state        |
+| `onDisconnect` | `() => void`                         | —           | Called when user clicks Disconnect |
+| `className`    | `string`                             | —           | Additional CSS classes             |
+
+### WalletBalance
+
+```ts
+interface WalletBalance {
+  symbol: string;
+  amount: string;
+  usdValue?: string | null;
+}
+```
+
+## Custom card
+
+Build your own wallet display with hooks:
+
+```tsx
+import { useWallet, useZapKit } from "@dngbuilds/zapkit-react";
+
+function MyWalletCard() {
+  const { account, status } = useWallet();
+  const { disconnect } = useZapKit();
+
+  if (status !== "connected" || !account) return null;
+
+  const short = `${account.address.slice(0, 6)}...${account.address.slice(-4)}`;
+
+  return (
+    <div className="rounded-lg border p-4">
+      <p className="font-mono text-sm">{short}</p>
+      <button onClick={disconnect}>Disconnect</button>
+    </div>
+  );
+}
+```

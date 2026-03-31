@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "network-badge",
+  "title": "NetworkBadge",
+  "description": "Small colored badge indicating the connected Starknet network (mainnet, sepolia, devnet, etc.).",
+  "registryDependencies": [
+    "badge"
+  ],
+  "files": [
+    {
+      "path": "registry/new-york/network-badge/network-badge.tsx",
+      "content": "\"use client\";\n\nimport { Badge } from \"@/components/ui/badge\";\nimport { cn } from \"@/lib/utils\";\n\nexport type NetworkName =\n  | \"mainnet\"\n  | \"sepolia\"\n  | \"devnet\"\n  | \"goerli\"\n  | (string & {});\n\nconst NETWORK_LABELS: Record<string, string> = {\n  mainnet: \"Mainnet\",\n  sepolia: \"Sepolia\",\n  devnet: \"Devnet\",\n  goerli: \"Goerli\",\n};\n\nconst NETWORK_CLASSES: Record<string, string> = {\n  mainnet: \"border-emerald-500/30 bg-emerald-500/10 text-emerald-400\",\n  sepolia: \"border-violet-500/30 bg-violet-500/10 text-violet-400\",\n  devnet: \"border-amber-500/30 bg-amber-500/10 text-amber-400\",\n  goerli: \"border-sky-500/30 bg-sky-500/10 text-sky-400\",\n};\n\nexport interface NetworkBadgeProps {\n  /** Starknet network identifier */\n  network: NetworkName;\n  className?: string;\n}\n\n/**\n * Small colored badge indicating the connected Starknet network.\n *\n * @example\n * ```tsx\n * <NetworkBadge network=\"mainnet\" />\n * <NetworkBadge network=\"sepolia\" />\n * ```\n */\nexport function NetworkBadge({ network, className }: NetworkBadgeProps) {\n  const label = NETWORK_LABELS[network] ?? network;\n  const colorClass =\n    NETWORK_CLASSES[network] ??\n    \"border-zinc-500/30 bg-zinc-500/10 text-zinc-400\";\n\n  return (\n    <Badge\n      variant=\"outline\"\n      className={cn(\"gap-1 capitalize\", colorClass, className)}\n    >\n      <span\n        aria-hidden\n        className=\"size-1.5 rounded-full bg-current shrink-0\"\n      />\n      {label}\n    </Badge>\n  );\n}\n",
+      "type": "registry:component"
+    }
+  ],
+  "categories": [
+    "connect"
+  ],
+  "type": "registry:component"
+}

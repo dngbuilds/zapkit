@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "transaction-status",
+  "title": "TransactionStatus",
+  "description": "Inline alert showing transaction state — spinner while pending, check when confirmed, error when failed.",
+  "dependencies": [
+    "@hugeicons/react",
+    "@hugeicons/core-free-icons"
+  ],
+  "registryDependencies": [
+    "alert",
+    "spinner"
+  ],
+  "files": [
+    {
+      "path": "registry/new-york/transaction-status/transaction-status.tsx",
+      "content": "\"use client\";\n\nimport { Alert, AlertDescription } from \"@/components/ui/alert\";\nimport { Spinner } from \"@/components/ui/spinner\";\nimport { cn } from \"@/lib/utils\";\nimport { HugeiconsIcon } from \"@hugeicons/react\";\nimport {\n  CheckmarkCircle01Icon,\n  Cancel01Icon,\n} from \"@hugeicons/core-free-icons\";\n\nexport type TxStatus = \"idle\" | \"pending\" | \"success\" | \"error\";\n\nexport interface TransactionStatusProps {\n  status: TxStatus;\n  /** Optional transaction hash for a block-explorer link */\n  txHash?: string | null;\n  /** Optional block explorer base URL, e.g. \"https://starkscan.co/tx/\" */\n  explorerUrl?: string;\n  /** Override the default status message */\n  message?: string | null;\n  className?: string;\n}\n\nconst DEFAULT_MESSAGES: Record<TxStatus, string> = {\n  idle: \"\",\n  pending: \"Transaction pending…\",\n  success: \"Transaction confirmed!\",\n  error: \"Transaction failed.\",\n};\n\n/**\n * Displays transaction state as an inline alert — spinner while pending,\n * check when confirmed, error when failed.\n *\n * @example\n * ```tsx\n * const { stake, status, txHash } = useStaking();\n * <TransactionStatus status={status} txHash={txHash} />\n * ```\n */\nexport function TransactionStatus({\n  status,\n  txHash,\n  explorerUrl = \"https://starkscan.co/tx/\",\n  message,\n  className,\n}: TransactionStatusProps) {\n  if (status === \"idle\") return null;\n\n  const text = message ?? DEFAULT_MESSAGES[status];\n\n  return (\n    <Alert\n      variant={status === \"error\" ? \"destructive\" : \"default\"}\n      className={cn(\"flex items-center gap-3 py-3\", className)}\n    >\n      {status === \"pending\" && <Spinner className=\"size-4 shrink-0\" />}\n      {status === \"success\" && (\n        <HugeiconsIcon\n          icon={CheckmarkCircle01Icon}\n          className=\"size-4 shrink-0 text-emerald-500\"\n          strokeWidth={2}\n          aria-hidden\n        />\n      )}\n      {status === \"error\" && (\n        <HugeiconsIcon\n          icon={Cancel01Icon}\n          className=\"size-4 shrink-0 text-destructive\"\n          strokeWidth={2}\n          aria-hidden\n        />\n      )}\n      <AlertDescription className=\"text-sm\">\n        {text}\n        {status === \"success\" && txHash && (\n          <a\n            href={`${explorerUrl}${txHash}`}\n            target=\"_blank\"\n            rel=\"noreferrer\"\n            className=\"ml-2 underline underline-offset-2 text-primary hover:no-underline\"\n          >\n            View on explorer ↗\n          </a>\n        )}\n      </AlertDescription>\n    </Alert>\n  );\n}\n",
+      "type": "registry:component"
+    }
+  ],
+  "categories": [
+    "common"
+  ],
+  "type": "registry:component"
+}

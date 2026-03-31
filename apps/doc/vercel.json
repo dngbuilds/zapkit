@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npx shadcn@latest build && next build",
+  "installCommand": "npm install"
+}
