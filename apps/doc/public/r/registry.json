@@ -10,7 +10,7 @@
       "description": "A smart button for wallet connect / disconnect. Shows a spinner while connecting, truncated address when connected.",
       "categories": ["connect"],
       "registryDependencies": ["button", "spinner"],
-      "dependencies": ["@zapkit/react"],
+      "dependencies": ["@dngbuilds/zapkit-react"],
       "files": [
         {
           "path": "registry/new-york/connect-wallet-button/connect-wallet-button.tsx",
@@ -81,15 +81,8 @@
       "title": "WalletCard",
       "description": "A card summarising the connected wallet: address, network, balances, and disconnect action.",
       "categories": ["connect"],
-      "registryDependencies": [
-        "card",
-        "button",
-        "separator",
-        "skeleton",
-        "tooltip",
-        "badge"
-      ],
-      "dependencies": ["@zapkit/react"],
+      "registryDependencies": ["card", "button", "separator", "skeleton", "tooltip", "badge"],
+      "dependencies": ["@dngbuilds/zapkit-react"],
       "files": [
         {
           "path": "registry/new-york/wallet-card/wallet-card.tsx",
