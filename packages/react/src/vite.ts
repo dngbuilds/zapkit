@@ -42,11 +42,13 @@ const VIRTUAL_PREFIX = "\0zapkit-shim:";
 const ETHERS_V5_UTILS_VIRTUAL = "\0zapkit:ethers-v5-utils";
 
 /**
- * Inline code for the ethers v5 `utils` compat shim.
- * Maps the most-used ethers v5 utils surface to ethers v6 equivalents.
- * The consumer's installed ethers v6 package is used at runtime.
+ * Generate the ethers v5 `utils` compat shim code.
+ * When ethersImportPath is provided (absolute path), it's used so the
+ * virtual module doesn't need to resolve "ethers" itself — avoids
+ * rolldown resolution failures from within virtual modules.
  */
-const ETHERS_V5_UTILS_SHIM = `
+function makeEthersV5Shim(ethersImportPath = "ethers"): string {
+  return `
 import {
   hexlify, zeroPadValue, zeroPadBytes, getBytes, concat,
   AbiCoder, Interface,
@@ -55,7 +57,7 @@ import {
   id, keccak256, solidityPackedKeccak256, solidityPacked,
   toUtf8Bytes, toUtf8String,
   namehash, Signature,
-} from "ethers";
+} from ${JSON.stringify(ethersImportPath)};
 
 const utils = {
   hexlify,
@@ -77,6 +79,7 @@ const utils = {
 };
 export default utils;
 `;
+}
 
 /** Shim source code keyed by package name */
 const SHIMS: Record<string, string> = {
@@ -144,17 +147,31 @@ function isNotInstalled(packageId: string, root: string): boolean {
   }
 }
 
+/** Resolve the real filesystem path of ethers so virtual modules can import it. */
+function resolveEthersPath(root: string): string | undefined {
+  try {
+    return require.resolve("ethers", { paths: [root] });
+  } catch {
+    return undefined;
+  }
+}
+
 export function zapkitPlugin() {
   let projectRoot = process.cwd();
+  let ethersPath: string | undefined;
 
   return {
     name: "zapkit",
 
     configResolved(config: { root: string }) {
       projectRoot = config.root;
+      ethersPath = resolveEthersPath(projectRoot);
     },
 
     config() {
+      // Resolve ethers path early for the optimizeDeps pipeline.
+      if (!ethersPath) ethersPath = resolveEthersPath(projectRoot);
+
       // Build the set of shims only for packages that aren't actually installed.
       const activeShims: Record<string, string> = {};
       for (const id of SHIMMED_IDS) {
@@ -178,7 +195,7 @@ export function zapkitPlugin() {
                   return undefined;
                 },
                 load(id: string) {
-                  if (id === ETHERS_COMPAT_ID) return ETHERS_V5_UTILS_SHIM;
+                  if (id === ETHERS_COMPAT_ID) return makeEthersV5Shim(ethersPath || "ethers");
                   if (id.startsWith(VIRTUAL_PREFIX)) {
                     const realId = id.slice(VIRTUAL_PREFIX.length);
                     return activeShims[realId];
@@ -222,7 +239,7 @@ export function zapkitPlugin() {
       return undefined;
     },
     load(id: string) {
-      if (id === ETHERS_V5_UTILS_VIRTUAL) return ETHERS_V5_UTILS_SHIM;
+      if (id === ETHERS_V5_UTILS_VIRTUAL) return makeEthersV5Shim(ethersPath || "ethers");
       if (id.startsWith(VIRTUAL_PREFIX)) {
         const realId = id.slice(VIRTUAL_PREFIX.length);
         return SHIMS[realId];
