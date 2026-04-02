@@ -39,12 +39,20 @@ npx shadcn@latest add "https://zapkit.vercel.app/r/connect-wallet-button.json"
 
 ```tsx
 import { ZapProvider } from "@dngbuilds/zapkit-react";
-import { ConnectWalletButton } from "@/components/connect-wallet-button";
 
 export default function App() {
   return (
-    <ZapProvider>
-      <ConnectWalletButton />
+    <ZapProvider
+      config={{
+        network: "sepolia",
+        bridging: {
+          ethereumRpcUrl: "https://eth-sepolia.g.alchemy.com/v2/<key>",
+          solanaRpcUrl: "https://starknet-sepolia.g.alchemy.com/v2/<key>",
+        },
+      }}
+      showDevPanel
+    >
+      {your entire app}
     </ZapProvider>
   );
 }

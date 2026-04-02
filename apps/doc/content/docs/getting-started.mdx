@@ -30,7 +30,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <ZapProvider>{children}</ZapProvider>
+        <ZapProvider
+          config={{
+            network: "sepolia",
+          }}
+        >
+          {children}
+        </ZapProvider>
       </body>
     </html>
   );
